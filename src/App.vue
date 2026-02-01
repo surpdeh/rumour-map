@@ -1,12 +1,17 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from "vue";
 import PanZoomMap from "./components/PanZoomMap.vue";
+import GoogleAuthButton from "./components/GoogleAuthButton.vue";
+import RumourFilter from "./components/RumourFilter.vue";
 import { useRumoursFromGoogle } from "./composables/useRumoursFromGoogle";
-const { rumours, loading, error, loadRumours } = useRumoursFromGoogle();
+import { useRumourFilter } from "./composables/useRumourFilter";
 
-// Filter out hidden rumours
+const { rumours, isLoading, error, refreshRumours } = useRumoursFromGoogle();
+const { filterState, filteredRumours, setFilter } = useRumourFilter(rumours);
+
+// Filter out hidden rumours from the filtered set
 const visibleRumours = computed(() => {
-  return rumours?.value?.filter((rumour) => !rumour.isHidden) ?? [];
+  return filteredRumours.value.filter((rumour) => !rumour.isHidden);
 });
 
 const mapImageUrl =
@@ -19,26 +24,43 @@ const mapImageUrl =
       <div class="Header-item">
         <h1 class="Header-title">Rumour Map</h1>
       </div>
+      
+      <div class="Header-item">
+        <GoogleAuthButton />
+      </div>
+
       <div class="Header-item Header-item--full"></div>
 
-      <div v-if="loading" class="Header-item">
+      <div v-if="isLoading" class="Header-item">
         <span class="Label Label--primary">Loading rumours...</span>
       </div>
 
       <div v-else-if="error" class="Header-item error">
-        <span class="Label Label--danger"
-          >Failed to load rumours: {{ error }}</span
-        >
+        <span class="Label Label--danger">{{ error }}</span>
       </div>
 
       <div v-else-if="rumours.length === 0" class="Header-item">
         <span class="Label Label--secondary">No rumours available</span>
       </div>
-      <div class="Header-item">
-        <button @click="loadRumours">Refresh</button>
+
+      <div v-if="rumours.length > 0" class="Header-item">
+        <RumourFilter 
+          :filter-state="filterState" 
+          @update:filter="setFilter"
+        />
       </div>
+
       <div class="Header-item">
-        <span class="Label">High Resolution Map Viewer</span>
+        <button 
+          @click="refreshRumours" 
+          class="refresh-btn"
+          :disabled="isLoading"
+          title="Refresh rumours from Google Sheets"
+        >
+          <span v-if="!isLoading">🔄</span>
+          <span v-else>⏳</span>
+          Refresh
+        </button>
       </div>
     </header>
 
@@ -63,6 +85,18 @@ const mapImageUrl =
   padding: 0.5rem 1rem;
   display: flex;
   align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.Header-item {
+  display: flex;
+  align-items: center;
+}
+
+.Header-item--full {
+  flex: 1;
+  min-width: 20px;
 }
 
 .Header-title {
@@ -72,8 +106,60 @@ const mapImageUrl =
   color: #c9d1d9;
 }
 
+.refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #c9d1d9;
+  background-color: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background-color: #30363d;
+  border-color: #8b949e;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .main-content {
   flex: 1;
   overflow: hidden;
+}
+
+@media (max-width: 1023px) {
+  .Header {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .Header-title {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .Header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .Header-item {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .Header-item--full {
+    display: none;
+  }
 }
 </style>

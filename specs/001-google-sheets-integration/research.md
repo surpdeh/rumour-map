@@ -118,7 +118,6 @@ Use **Google Identity Services (GIS)** for OAuth2 + **gapi-script** for Sheets A
 ```typescript
 export const GOOGLE_CONFIG = {
   clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-  apiKey: import.meta.env.VITE_GOOGLE_API_KEY,
   spreadsheetId: import.meta.env.VITE_SPREADSHEET_ID,
   scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
   discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
@@ -128,7 +127,6 @@ export const GOOGLE_CONFIG = {
 **Environment variables** (`.env.local` - not committed):
 ```
 VITE_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
-VITE_GOOGLE_API_KEY=your-api-key
 VITE_SPREADSHEET_ID=your-sheet-id
 ```
 

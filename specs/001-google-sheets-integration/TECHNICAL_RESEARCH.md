@@ -278,14 +278,12 @@ async function loadRumours(state: FetchState) {
 // vite-env.d.ts
 interface ImportMetaEnv {
   readonly VITE_GOOGLE_CLIENT_ID: string
-  readonly VITE_GOOGLE_API_KEY: string
   readonly VITE_SPREADSHEET_ID: string
 }
 
 // Usage
 const config = {
   clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-  apiKey: import.meta.env.VITE_GOOGLE_API_KEY,
   spreadsheetId: import.meta.env.VITE_SPREADSHEET_ID,
 }
 ```
