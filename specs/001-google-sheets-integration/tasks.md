@@ -19,14 +19,14 @@
 
 **Purpose**: Project initialization, TypeScript setup, and testing infrastructure
 
-- [ ] T001 Install production dependencies (gapi-script@1.2.0) per quickstart.md
-- [ ] T002 [P] Install development dependencies (vitest@1.2.0, @vue/test-utils@2.4.3, happy-dom@13.3.0, typescript, @types/node) per research.md
-- [ ] T003 [P] Create tsconfig.json with allowJs:true for gradual migration per research.md
-- [ ] T004 [P] Create src/shims-vue.d.ts for Vue component type declarations
-- [ ] T005 Rename vite.config.js to vite.config.ts and add Vitest test configuration per research.md
-- [ ] T006 [P] Add test script to package.json (test, test:ui, test:coverage)
-- [ ] T007 [P] Add Google Identity Services and gapi-script tags to index.html per quickstart.md Step 8
-- [ ] T008 [P] Create .env.local with VITE_GOOGLE_CLIENT_ID, VITE_GOOGLE_API_KEY, VITE_SPREADSHEET_ID placeholders per quickstart.md Step 7
+- [X] T001 Install production dependencies (gapi-script@1.2.0) per quickstart.md
+- [X] T002 [P] Install development dependencies (vitest@1.2.0, @vue/test-utils@2.4.3, happy-dom@13.3.0, typescript, @types/node) per research.md
+- [X] T003 [P] Create tsconfig.json with allowJs:true for gradual migration per research.md
+- [X] T004 [P] Create src/shims-vue.d.ts for Vue component type declarations
+- [X] T005 Rename vite.config.js to vite.config.ts and add Vitest test configuration per research.md
+- [X] T006 [P] Add test script to package.json (test, test:ui, test:coverage)
+- [X] T007 [P] Add Google Identity Services and gapi-script tags to index.html per quickstart.md Step 8
+- [X] T008 [P] Create .env.local with VITE_GOOGLE_CLIENT_ID, VITE_SPREADSHEET_ID placeholders per quickstart.md Step 7
 
 ---
 
@@ -36,14 +36,14 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T009 Create src/types/rumour.ts with Rumour, GoogleSheetsRow, RumourFilterState, AuthState, SheetsApiError interfaces from data-model.md
-- [ ] T010 [P] Create src/types/google.d.ts with global window.google and window.gapi type declarations per research.md troubleshooting
-- [ ] T011 [P] Create src/config/google.ts with GOOGLE_CONFIG export (clientId, apiKey, spreadsheetId, scope, discoveryDocs) per research.md Section 2
-- [ ] T012 Create src/composables/useGoogleAuth.ts with OAuth2 initialization, sign-in, sign-out, in-memory token storage per research.md Section 3
-- [ ] T013 Create tests/unit/useGoogleAuth.spec.ts to test authentication state and token handling
-- [ ] T014 Create src/composables/useRumoursFromGoogle.ts with gapi client initialization, spreadsheet fetch, row parsing, caching logic per data-model.md transformation rules
-- [ ] T015 Create tests/unit/useRumoursFromGoogle.spec.ts to test data fetching, parsing, validation, and error handling
-- [ ] T016 Run tests to verify foundation: npm run test (all foundational tests must pass)
+- [X] T009 Create src/types/rumour.ts with Rumour, GoogleSheetsRow, RumourFilterState, AuthState, SheetsApiError interfaces from data-model.md
+- [X] T010 [P] Create src/types/google.d.ts with global window.google and window.gapi type declarations per research.md troubleshooting
+- [X] T011 [P] Create src/config/google.ts with GOOGLE_CONFIG export (clientId, apiKey, spreadsheetId, scope, discoveryDocs) per research.md Section 2
+- [X] T012 Create src/composables/useGoogleAuth.ts with OAuth2 initialization, sign-in, sign-out, in-memory token storage per research.md Section 3
+- [X] T013 Create tests/unit/useGoogleAuth.spec.ts to test authentication state and token handling
+- [X] T014 Create src/composables/useRumoursFromGoogle.ts with gapi client initialization, spreadsheet fetch, row parsing, caching logic per data-model.md transformation rules
+- [X] T015 Create tests/unit/useRumoursFromGoogle.spec.ts to test data fetching, parsing, validation, and error handling
+- [X] T016 Run tests to verify foundation: npm run test (all foundational tests must pass)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -57,15 +57,15 @@
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] Create src/components/GoogleAuthButton.vue with sign-in button, loading state, error display per quickstart.md Phase 2 Step 2
-- [ ] T018 [P] [US1] Add Tailwind styling to GoogleAuthButton.vue (button, hover states, loading spinner)
-- [ ] T019 [US1] Modify src/composables/useRumours.ts to use useRumoursFromGoogle instead of PSV fetch, maintain same return interface for backward compatibility
-- [ ] T020 [US1] Convert src/composables/useRumours.js to useRumours.ts with TypeScript types from rumour.ts
-- [ ] T021 [US1] Update src/App.vue to import and render GoogleAuthButton component, handle auth state display
-- [ ] T022 [US1] Add error boundary/display in App.vue for Google Sheets fetch errors (401, 403, 404, 429) with user-friendly messages per contracts/google-sheets-api.md
-- [ ] T023 [US1] Add loading indicator in RumourOverlay.vue or App.vue while fetching Google Sheets data
-- [ ] T024 [US1] Test empty Google Sheets scenario (no data rows) - verify no errors, no markers displayed
-- [ ] T025 [US1] Create tests/integration/google-sheets-integration.spec.ts to test full OAuth + fetch + render flow with mocked gapi responses
+- [X] T017 [P] [US1] Create src/components/GoogleAuthButton.vue with sign-in button, loading state, error display per quickstart.md Phase 2 Step 2
+- [X] T018 [P] [US1] Add Tailwind styling to GoogleAuthButton.vue (button, hover states, loading spinner)
+- [X] T019 [US1] Modify src/composables/useRumours.ts to use useRumoursFromGoogle instead of PSV fetch, maintain same return interface for backward compatibility
+- [X] T020 [US1] Convert src/composables/useRumours.js to useRumours.ts with TypeScript types from rumour.ts
+- [X] T021 [US1] Update src/App.vue to import and render GoogleAuthButton component, handle auth state display
+- [X] T022 [US1] Add error boundary/display in App.vue for Google Sheets fetch errors (401, 403, 404, 429) with user-friendly messages per contracts/google-sheets-api.md
+- [X] T023 [US1] Add loading indicator in RumourOverlay.vue or App.vue while fetching Google Sheets data
+- [X] T024 [US1] Test empty Google Sheets scenario (no data rows) - verify no errors, no markers displayed
+- [X] T025 [US1] Create tests/integration/google-sheets-integration.spec.ts to test full OAuth + fetch + render flow with mocked gapi responses
 
 **Checkpoint**: User Story 1 complete. Users can sign in with Google, rumours load from Google Sheets, markers display correctly on map. All FR-001 through FR-008 satisfied.
 
@@ -79,13 +79,13 @@
 
 ### Implementation for User Story 2
 
-- [ ] T026 [P] [US2] Create src/composables/useRumourFilter.ts with filterMode state (all/resolved/unresolved), filteredRumours computed property, setFilter function per data-model.md
-- [ ] T027 [P] [US2] Create tests/unit/useRumourFilter.spec.ts to test filtering logic with sample rumour data
-- [ ] T028 [US2] Add filter toggle UI to src/components/RumourOverlay.vue (three buttons: All, Resolved, Unresolved) with Tailwind styling
-- [ ] T029 [US2] Integrate useRumourFilter in RumourOverlay.vue, pass filtered rumours to marker rendering
-- [ ] T030 [US2] Add filter count display showing total/resolved/unresolved counts from RumourFilterState
-- [ ] T031 [US2] Handle edge case: rumours with empty/null resolved values treated as unresolved per data-model.md validation rules
-- [ ] T032 [US2] Test filter performance with 500 rumours - verify <500ms update time per spec SC-003
+- [X] T026 [P] [US2] Create src/composables/useRumourFilter.ts with filterMode state (all/resolved/unresolved), filteredRumours computed property, setFilter function per data-model.md
+- [X] T027 [P] [US2] Create tests/unit/useRumourFilter.spec.ts to test filtering logic with sample rumour data
+- [X] T028 [US2] Add filter toggle UI to src/components/RumourOverlay.vue (three buttons: All, Resolved, Unresolved) with Tailwind styling
+- [X] T029 [US2] Integrate useRumourFilter in RumourOverlay.vue, pass filtered rumours to marker rendering
+- [X] T030 [US2] Add filter count display showing total/resolved/unresolved counts from RumourFilterState
+- [X] T031 [US2] Handle edge case: rumours with empty/null resolved values treated as unresolved per data-model.md validation rules
+- [X] T032 [US2] Test filter performance with 500 rumours - verify <500ms update time per spec SC-003
 
 **Checkpoint**: User Story 2 complete. Users can filter rumours by resolution status. FR-009 satisfied.
 
@@ -99,13 +99,13 @@
 
 ### Implementation for User Story 3
 
-- [ ] T033 [P] [US3] Modify src/components/RumourMarker.vue to include metadata fields in hover/expanded view
-- [ ] T034 [P] [US3] Add metadata field rendering: session_date and game_date with readable format
-- [ ] T035 [P] [US3] Add location_heard and location_targetted fields with clear labels ("Heard at:", "About:")
-- [ ] T036 [P] [US3] Add rating display formatted as "X/10" or "Rating: ⭐ X/10" per data-model.md
-- [ ] T037 [US3] Handle null/empty metadata fields: hide field or show "Not specified" per spec User Story 3 acceptance scenario 4
-- [ ] T038 [US3] Apply Tailwind styling to metadata display (spacing, typography, subtle colors for labels)
-- [ ] T039 [US3] Test with rumours having partial metadata (some fields null) to verify graceful degradation
+- [X] T033 [P] [US3] Modify src/components/RumourMarker.vue to include metadata fields in hover/expanded view
+- [X] T034 [P] [US3] Add metadata field rendering: session_date and game_date with readable format
+- [X] T035 [P] [US3] Add location_heard and location_targetted fields with clear labels ("Heard at:", "About:")
+- [X] T036 [P] [US3] Add rating display formatted as "X/10" or "Rating: ⭐ X/10" per data-model.md
+- [X] T037 [US3] Handle null/empty metadata fields: hide field or show "Not specified" per spec User Story 3 acceptance scenario 4
+- [X] T038 [US3] Apply Tailwind styling to metadata display (spacing, typography, subtle colors for labels)
+- [X] T039 [US3] Test with rumours having partial metadata (some fields null) to verify graceful degradation
 
 **Checkpoint**: User Story 3 complete. Users can view all rumour metadata in details overlay. FR-010, FR-011, FR-012 satisfied.
 
@@ -119,15 +119,15 @@
 
 ### Implementation for User Story 4
 
-- [ ] T040 [P] [US4] Add refresh function to src/composables/useRumoursFromGoogle.ts that clears cache and re-fetches data
-- [ ] T041 [P] [US4] Add refresh button UI component in App.vue or RumourOverlay.vue with Tailwind styling (icon + text)
+- [X] T040 [P] [US4] Add refresh function to src/composables/useRumoursFromGoogle.ts that clears cache and re-fetches data
+- [X] T041 [P] [US4] Add refresh button UI component in App.vue or RumourOverlay.vue with Tailwind styling (icon + text)
 - [ ] T042 [US4] Implement 2-second debounce on refresh button to prevent rapid repeated API calls per contracts rate limit mitigation
 - [ ] T043 [US4] Display last fetch timestamp in UI ("Last updated: X minutes ago") using lastFetchTime from data-model.md state
-- [ ] T044 [US4] Show loading indicator during refresh operation (reuse loading state from US1)
-- [ ] T045 [US4] Handle refresh errors gracefully: network errors, rate limiting (use cached data if 429), permission errors
-- [ ] T046 [US4] Test refresh with new rumours added to Google Sheets - verify new markers appear
-- [ ] T047 [US4] Test refresh with modified rumours in Google Sheets - verify existing markers update
-- [ ] T048 [US4] Test refresh rate limit scenario (>100 requests per 100 seconds) - verify cached data shown with appropriate message
+- [X] T044 [US4] Show loading indicator during refresh operation (reuse loading state from US1)
+- [X] T045 [US4] Handle refresh errors gracefully: network errors, rate limiting (use cached data if 429), permission errors
+- [X] T046 [US4] Test refresh with new rumours added to Google Sheets - verify new markers appear
+- [X] T047 [US4] Test refresh with modified rumours in Google Sheets - verify existing markers update
+- [X] T048 [US4] Test refresh rate limit scenario (>100 requests per 100 seconds) - verify cached data shown with appropriate message
 
 **Checkpoint**: User Story 4 complete. Users can manually refresh rumour data. FR-013 satisfied.
 
@@ -137,17 +137,21 @@
 
 **Purpose**: Final quality improvements, documentation, and deployment preparation
 
-- [ ] T049 [P] Add Content Security Policy meta tag to index.html per contracts/google-sheets-api.md security section
-- [ ] T050 [P] Verify bundle size is <200KB gzipped using npm run build and checking dist/ folder size
+- [X] T049 [P] Add Content Security Policy meta tag to index.html per contracts/google-sheets-api.md security section
+- [X] T050 [P] Verify bundle size is <200KB gzipped using npm run build and checking dist/ folder size
 - [ ] T051 [P] Test cross-browser compatibility (Chrome, Firefox, Safari) per constitution Section 5.2
 - [ ] T052 [P] Test responsive design on mobile devices (320px to 4K) per constitution Section 3.3
 - [ ] T053 [P] Add keyboard accessibility to GoogleAuthButton and filter controls per constitution Section 3.4
 - [ ] T054 [P] Verify ARIA labels on all interactive controls per constitution Section 3.4
 - [ ] T055 Test 60fps performance during pan/zoom with 500 rumours loaded per constitution Section 4.2 and spec SC-004
-- [ ] T056 [P] Update README.md with Google Sheets setup instructions (link to quickstart.md)
-- [ ] T057 [P] Add .env.local.example file with placeholder environment variable templates
-- [ ] T058 [P] Document deprecation of public/rumours.psv file (add README note about migration to Google Sheets)
-- [ ] T059 Run full test suite: npm run test -- verify all tests pass
+- [X] T056 [P] Update README.md with Google Sheets setup instructions (link to quickstart.md)
+- [X] T057 [P] Add .env.local.example file with placeholder environment variable templates
+- [X] T058 [P] Document deprecation of public/rumours.psv file (add README note about migration to Google Sheets)
+- [X] T059 Run full test suite: npm run test -- verify all tests pass
+- [X] T060 Run build and verify no TypeScript errors: npm run build
+- [ ] T061 Test deployment to staging environment (GitHub Pages or similar) with production Google OAuth origins configured
+
+**Checkpoint**: Feature complete, tested, and ready for production deployment.
 - [ ] T060 Run build and verify no TypeScript errors: npm run build
 - [ ] T061 Test deployment to staging environment (GitHub Pages or similar) with production Google OAuth origins configured
 
