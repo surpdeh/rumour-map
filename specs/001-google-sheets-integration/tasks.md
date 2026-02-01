@@ -26,7 +26,7 @@
 - [ ] T005 Rename vite.config.js to vite.config.ts and add Vitest test configuration per research.md
 - [ ] T006 [P] Add test script to package.json (test, test:ui, test:coverage)
 - [ ] T007 [P] Add Google Identity Services and gapi-script tags to index.html per quickstart.md Step 8
-- [ ] T008 [P] Create .env.local with VITE_GOOGLE_CLIENT_ID, VITE_GOOGLE_API_KEY, VITE_SPREADSHEET_ID placeholders per quickstart.md Step 7
+- [ ] T008 [P] Create .env.local with VITE_GOOGLE_CLIENT_ID, VITE_SPREADSHEET_ID placeholders per quickstart.md Step 7
 
 ---
 

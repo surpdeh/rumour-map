@@ -18,15 +18,11 @@ export interface GoogleConfig {
  */
 export function getGoogleConfig(): GoogleConfig {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
-  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY
   const spreadsheetId = import.meta.env.VITE_SPREADSHEET_ID
+  const apiKey = '' // API key not required for Google sheets
   
   if (!clientId) {
     throw new Error('VITE_GOOGLE_CLIENT_ID is not set in environment variables')
-  }
-  
-  if (!apiKey) {
-    throw new Error('VITE_GOOGLE_API_KEY is not set in environment variables')
   }
   
   if (!spreadsheetId) {

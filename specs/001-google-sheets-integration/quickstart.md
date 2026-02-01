@@ -113,7 +113,6 @@ Create `.env.local` in the project root (this file is gitignored):
 ```bash
 # .env.local
 VITE_GOOGLE_CLIENT_ID=123456789-abc123def456.apps.googleusercontent.com
-VITE_GOOGLE_API_KEY=AIzaSyABC123DEF456GHI789JKL012MNO345PQR
 VITE_SPREADSHEET_ID=1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms
 VITE_SHEET_NAME=Sheet1
 VITE_SHEET_RANGE=A2:J
@@ -121,7 +120,6 @@ VITE_SHEET_RANGE=A2:J
 
 **Replace with your actual values**:
 - `VITE_GOOGLE_CLIENT_ID`: From Step 3
-- `VITE_GOOGLE_API_KEY`: From Step 4
 - `VITE_SPREADSHEET_ID`: From Step 5
 
 ### Step 8: Add GIS Script to HTML

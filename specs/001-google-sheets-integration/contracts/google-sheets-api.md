@@ -447,9 +447,6 @@ Required in `.env.local` (not committed to git):
 # Google OAuth2 Client ID (from Google Cloud Console)
 VITE_GOOGLE_CLIENT_ID=123456789-abc123def456.apps.googleusercontent.com
 
-# Google API Key (from Google Cloud Console)
-VITE_GOOGLE_API_KEY=AIzaSyABC123DEF456GHI789JKL012MNO345PQR
-
 # Target Google Sheets ID (from sheet URL)
 VITE_SPREADSHEET_ID=1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms
 
