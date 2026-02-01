@@ -44,7 +44,48 @@
         role="region"
         :aria-label="`Description for ${rumour.title}`"
       >
-        {{ rumour.description }}
+        <!-- Extended metadata -->
+        <div class="marker-metadata">
+          <div v-if="rumour.session_date" class="metadata-item">
+            <span class="metadata-label">Session:</span>
+            <span class="metadata-value">{{ formatDate(rumour.session_date) }}</span>
+          </div>
+          
+          <div v-if="rumour.game_date" class="metadata-item">
+            <span class="metadata-label">Game Date:</span>
+            <span class="metadata-value">{{ rumour.game_date }}</span>
+          </div>
+          
+          <div v-if="rumour.location_heard" class="metadata-item">
+            <span class="metadata-label">Heard at:</span>
+            <span class="metadata-value">{{ rumour.location_heard }}</span>
+          </div>
+          
+          <div v-if="rumour.location_targetted" class="metadata-item">
+            <span class="metadata-label">Location:</span>
+            <span class="metadata-value">{{ rumour.location_targetted }}</span>
+          </div>
+          
+          <div v-if="rumour.rating !== null" class="metadata-item">
+            <span class="metadata-label">Rating:</span>
+            <span class="metadata-value">{{ formatRating(rumour.rating) }}</span>
+          </div>
+
+          <div class="metadata-item">
+            <span class="metadata-label">Status:</span>
+            <span 
+              class="metadata-value status-badge"
+              :class="rumour.resolved ? 'status-resolved' : 'status-unresolved'"
+            >
+              {{ rumour.resolved ? 'Resolved' : 'Unresolved' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Details/description -->
+        <div v-if="rumour.details" class="marker-details">
+          {{ rumour.details }}
+        </div>
       </div>
     </transition>
   </div>
@@ -67,6 +108,27 @@ const props = defineProps({
 const emit = defineEmits(['toggle-pin', 'drag-start'])
 
 const markerRef = ref(null)
+
+// Format helpers
+function formatDate(dateStr) {
+  if (!dateStr) return null
+  try {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return dateStr
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    })
+  } catch {
+    return dateStr
+  }
+}
+
+function formatRating(rating) {
+  if (rating === null || rating === undefined) return null
+  return `${rating}/10`
+}
 
 // Calculate screen position from map coordinates
 const markerStyle = computed(() => {
@@ -292,6 +354,57 @@ onBeforeUnmount(() => {
   margin-top: 0.5rem;
   padding-top: 0.5rem;
   border-top: 1px solid #30363d;
+}
+
+.marker-metadata {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+
+.metadata-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.metadata-label {
+  font-weight: 600;
+  color: #8b949e;
+  flex-shrink: 0;
+  min-width: 70px;
+}
+
+.metadata-value {
+  color: #c9d1d9;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.status-resolved {
+  color: #3fb950;
+  background-color: rgba(46, 160, 67, 0.15);
+}
+
+.status-unresolved {
+  color: #e3b341;
+  background-color: rgba(187, 128, 9, 0.15);
+}
+
+.marker-details {
+  color: #8b949e;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #21262d;
+  font-size: 0.7rem;
+  line-height: 1.5;
 }
 
 /* Expand transition */
