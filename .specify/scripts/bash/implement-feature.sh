@@ -21,6 +21,55 @@
 
 set -e
 
+# Show help message
+show_help() {
+    cat << 'EOF'
+Usage: implement-feature.sh [FEATURE_DIR]
+
+Feature Implementation Automation Script
+
+This script automates the execution of feature implementation following the spec-kit workflow:
+1. Parse tasks.md structure
+2. Check checklists status (validate all completed)
+3. Load and analyze implementation context
+4. Verify project setup (ignore files)
+5. Provide next steps for manual implementation
+
+ARGUMENTS:
+  FEATURE_DIR    Path to feature specification directory (e.g., specs/001-google-sheets-integration)
+                 If not provided, uses current branch to determine feature directory
+
+OPTIONS:
+  --help, -h     Show this help message
+
+EXAMPLES:
+  # Run with explicit feature directory
+  ./implement-feature.sh specs/001-google-sheets-integration
+
+  # Run using current branch to determine feature directory
+  ./implement-feature.sh
+
+EXIT CODES:
+  0    Success - all prerequisites validated
+  1    Error - missing files, invalid directory, etc.
+
+WORKFLOW STEPS:
+  ✅ Step 1: Parse tasks.md structure
+  ✅ Step 2: Check checklists status with completion table
+  ✅ Step 3: Load and analyze implementation context
+  ✅ Step 4: Verify project setup (create/update ignore files)
+  ℹ️  Steps 5-9: Manual implementation following tasks.md plan
+
+For more information, see .specify/scripts/bash/README.md
+EOF
+    exit 0
+}
+
+# Parse arguments
+if [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "-h" ]]; then
+    show_help
+fi
+
 # Color output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
