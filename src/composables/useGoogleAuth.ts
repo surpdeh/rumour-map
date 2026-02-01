@@ -101,7 +101,7 @@ export function useGoogleAuth(): UseGoogleAuthReturn {
             resolve()
           }
         }
-        tokenClient.requestAccessToken({ prompt: 'consent' })
+        tokenClient.requestAccessToken({ prompt: '' })
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'

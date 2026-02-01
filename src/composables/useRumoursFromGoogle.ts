@@ -103,16 +103,16 @@ export function useRumoursFromGoogle(): UseRumoursFromGoogleReturn {
         return []
       }
 
-      const headers = rows[0]
+      const headers = rows[0] as string[]
       const dataRows = rows.slice(1)
 
       // Map headers to create objects
       const mappedRumours = dataRows.map((row: string[], index: number) => {
-        const obj: any = {}
+        const obj: Record<string, string | null> = {}
         headers.forEach((header: string, i: number) => {
           obj[header] = row[i] ?? null
         })
-        return transformRow(obj as GoogleSheetsRow, index)
+        return transformRow(obj as unknown as GoogleSheetsRow, index)
       })
 
       return mappedRumours

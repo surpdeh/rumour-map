@@ -9,13 +9,24 @@ export function useRumourFilter(rumours: Ref<Rumour[]>): UseRumourFilterReturn {
     unresolvedCount: 0
   })
 
+  // Separate computed for counts to avoid recalculating on every filter change
+  const counts = computed(() => {
+    const allRumours = rumours.value || []
+    return {
+      total: allRumours.length,
+      resolved: allRumours.filter(r => r.resolved).length,
+      unresolved: allRumours.filter(r => !r.resolved).length
+    }
+  })
+
   const filteredRumours = computed(() => {
     const allRumours = rumours.value || []
     
-    // Update counts
-    filterState.value.totalCount = allRumours.length
-    filterState.value.resolvedCount = allRumours.filter(r => r.resolved).length
-    filterState.value.unresolvedCount = allRumours.filter(r => !r.resolved).length
+    // Update counts from memoized computation
+    const { total, resolved, unresolved } = counts.value
+    filterState.value.totalCount = total
+    filterState.value.resolvedCount = resolved
+    filterState.value.unresolvedCount = unresolved
 
     // Apply filter
     switch (filterState.value.filterMode) {

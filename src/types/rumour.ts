@@ -9,7 +9,7 @@
  */
 export interface Rumour {
   // Google Sheets source data
-  id: string                  // Generated: row index or hash of data
+  id: string                  // Generated from row index (e.g., "rumour-0")
   session_date: string | null // When rumour was recorded (session date)
   game_date: string | null    // In-game date/time
   location_heard: string | null // Where players heard the rumour
