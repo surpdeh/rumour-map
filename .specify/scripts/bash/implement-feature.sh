@@ -167,8 +167,8 @@ check_checklists() {
         # Count completed items: - [X], - [x]
         completed=$(grep -E '^\s*-\s+\[[Xx]\]' "$file" | wc -l || echo 0)
 
-        # Count incomplete items: - [ ]
-        incomplete=$(grep -E '^\s*-\s+\[ \]' "$file" | wc -l || echo 0)
+        # Calculate incomplete items
+        incomplete=$((total - completed))
 
         # Determine status
         local status="✓ PASS"
@@ -196,9 +196,9 @@ check_checklists() {
 # Check checklists and prompt user if incomplete
 if ! check_checklists; then
     echo ""
-    read -p "Some checklists are incomplete. Do you want to proceed with implementation anyway? (yes/no): " answer
-    case "$answer" in
-        yes|y|Yes|YES|proceed|continue)
+    read -p "Some checklists are incomplete. Proceed anyway? (yes/no): " answer
+    case "${answer,,}" in  # Convert to lowercase
+        yes|y|proceed|continue)
             log_info "Proceeding with implementation despite incomplete checklists..."
             ;;
         *)
@@ -254,6 +254,8 @@ log_info "Verifying project setup and ignore files..."
 REPO_ROOT=$(get_repo_root)
 
 # Function to check and create/update ignore file
+
+# Function to check and create/update ignore file
 verify_ignore_file() {
     local ignore_file="$1"
     shift
@@ -268,10 +270,17 @@ verify_ignore_file() {
         for pattern in "${patterns[@]}"; do
             # Check for exact match or similar patterns (e.g., "node_modules" matches "node_modules/")
             local pattern_base="${pattern%/}"
-            # Escape special regex characters for grep
-            local escaped_pattern=$(printf '%s\n' "$pattern_base" | sed 's/[.[\*^$]/\\&/g')
-            if ! grep -qE "^${escaped_pattern}/?$" "$ignore_file" && ! grep -qF "$pattern" "$ignore_file"; then
-                missing_patterns+=("$pattern")
+            # For patterns starting with !, skip regex check and just check if exists
+            if [[ "$pattern" == !* ]]; then
+                if ! grep -qF "$pattern" "$ignore_file"; then
+                    missing_patterns+=("$pattern")
+                fi
+            else
+                # Escape special regex characters for grep
+                local escaped_pattern=$(printf '%s\n' "$pattern_base" | sed 's/[.[*^$\\]/\\&/g')
+                if ! grep -qE "^${escaped_pattern}/?$" "$ignore_file" && ! grep -qF "$pattern" "$ignore_file"; then
+                    missing_patterns+=("$pattern")
+                fi
             fi
         done
         
@@ -367,11 +376,11 @@ fi
 # STEP 5-9: Task Execution (Manual Step - Agent Required)
 # ============================================================================
 
-log_info ""
+echo ""
 log_info "============================================================================"
 log_info "Prerequisites Complete!"
 log_info "============================================================================"
-log_info ""
+echo ""
 log_info "The following files are ready for implementation:"
 log_info "  - Tasks: $TASKS_FILE"
 log_info "  - Plan: $PLAN_FILE"
@@ -379,7 +388,7 @@ log_info "  - Plan: $PLAN_FILE"
 [[ -d "$CONTRACTS_DIR" ]] && log_info "  - Contracts: $CONTRACTS_DIR"
 [[ -f "$RESEARCH_FILE" ]] && log_info "  - Research: $RESEARCH_FILE"
 [[ -f "$QUICKSTART_FILE" ]] && log_info "  - Quickstart: $QUICKSTART_FILE"
-log_info ""
+echo ""
 log_info "Next steps:"
 log_info "  1. Review the task list in tasks.md"
 log_info "  2. Begin implementation following the phase-by-phase plan"
@@ -387,11 +396,11 @@ log_info "  3. Mark tasks as complete [X] in tasks.md as you progress"
 log_info "  4. Respect task dependencies and parallel execution markers [P]"
 log_info "  5. Follow TDD approach: write tests before implementation"
 log_info "  6. Validate each phase before proceeding to the next"
-log_info ""
+echo ""
 log_success "Ready to begin implementation! 🚀"
-log_info ""
+echo ""
 log_info "Note: Task execution (Steps 5-9) requires manual implementation or agent"
 log_info "      assistance. This script has verified all prerequisites and project setup."
-log_info ""
+echo ""
 
 exit 0
