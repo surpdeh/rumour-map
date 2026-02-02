@@ -436,7 +436,9 @@ const saveEdits = () => {
     const normalizedNew = (newValue === '' || newValue === null || newValue === undefined) ? null : newValue
     const normalizedOld = (oldValue === '' || oldValue === null || oldValue === undefined) ? null : oldValue
     
-    // Use loose equality for better type handling
+    // Use loose equality (!=) intentionally for type coercion between null/undefined
+    // This handles cases where Google Sheets may return undefined vs null vs empty string
+    // eslint-disable-next-line eqeqeq
     if (normalizedNew != normalizedOld) {
       // Update the rumour object (note: direct mutation is acceptable here as rumour is a reactive object)
       props.rumour[fieldName] = normalizedNew
