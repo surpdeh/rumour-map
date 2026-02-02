@@ -311,6 +311,11 @@ const handleMouseEnter = () => {
 }
 
 const handleMouseLeave = () => {
+  // Don't collapse when in edit mode
+  if (isEditing.value) {
+    return
+  }
+  
   // Clear timeout if mouse leaves before expansion
   if (hoverTimeout.value) {
     clearTimeout(hoverTimeout.value)
@@ -328,6 +333,11 @@ const togglePin = () => {
 }
 
 const handleMouseDown = (e) => {
+  // Don't start drag when in edit mode
+  if (isEditing.value) {
+    return
+  }
+  
   if (!props.rumour.isPinned && e.button === 0) {
     emit('drag-start', { rumour: props.rumour, event: e })
   }
