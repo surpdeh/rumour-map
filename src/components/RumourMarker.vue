@@ -33,7 +33,7 @@
         <span v-if="rumour.isPinned">📍</span>
         <span v-else>⋮⋮</span>
       </button>
-      <div class="marker-title">{{ rumour.title }}</div>
+      <div v-if="rumour.isHovered" class="marker-title">{{ rumour.title }}</div>
       <span 
         v-if="rumour.isModified" 
         class="modified-indicator" 
@@ -295,13 +295,17 @@ onBeforeUnmount(() => {
   background-color: rgba(22, 27, 34, 0.9);
   border: 1px solid #58a6ff;
   border-radius: 6px;
-  padding: 0.5rem;
-  max-width: 200px;
+  padding: 0.25rem;
+  width: 35px;
+  height: 35px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease-out;
   transform-origin: top left;
   pointer-events: auto;
   touch-action: none; /* Prevent default touch behaviors */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .rumour-marker:focus {
@@ -333,8 +337,12 @@ onBeforeUnmount(() => {
 
 .rumour-marker.is-hovered {
   background-color: rgba(22, 27, 34, 0.95);
+  width: auto;
+  height: auto;
   max-width: 300px;
+  padding: 0.5rem;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  display: block;
 }
 
 .marker-header {
@@ -343,15 +351,23 @@ onBeforeUnmount(() => {
   gap: 0.5rem;
 }
 
+.rumour-marker:not(.is-hovered) .marker-header {
+  justify-content: center;
+}
+
 .pin-button {
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
-  font-size: 1rem;
+  font-size: 1.2rem;
   line-height: 1;
   transition: transform 0.1s;
   flex-shrink: 0;
+}
+
+.rumour-marker.is-hovered .pin-button {
+  font-size: 1rem;
 }
 
 .pin-button:hover {
