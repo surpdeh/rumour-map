@@ -488,25 +488,27 @@ onBeforeUnmount(() => {
 
 /* Responsive sizing */
 @media (max-width: 1023px) {
-  .rumour-marker {
-    max-width: 180px;
-    font-size: 0.875rem;
+  .rumour-marker:not(.is-hovered) {
+    width: 32px;
+    height: 32px;
   }
 
   .rumour-marker.is-hovered {
     max-width: 250px;
+    font-size: 0.875rem;
   }
 }
 
 @media (max-width: 767px) {
-  .rumour-marker {
-    max-width: 150px;
-    font-size: 0.75rem;
-    padding: 0.375rem;
+  .rumour-marker:not(.is-hovered) {
+    width: 28px;
+    height: 28px;
   }
 
   .rumour-marker.is-hovered {
     max-width: 200px;
+    font-size: 0.75rem;
+    padding: 0.375rem;
   }
 
   .marker-description {
