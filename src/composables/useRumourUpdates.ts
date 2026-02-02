@@ -12,9 +12,11 @@ const modifiedRumours: Ref<Set<string>> = ref(new Set())
  */
 const columnIndexToLetter = (index: number): string => {
   let letter = ''
-  while (index >= 0) {
-    letter = String.fromCharCode((index % 26) + 65) + letter
-    index = Math.floor(index / 26) - 1
+  let num = index + 1 // Convert to 1-based
+  while (num > 0) {
+    const remainder = (num - 1) % 26
+    letter = String.fromCharCode(65 + remainder) + letter
+    num = Math.floor((num - 1) / 26)
   }
   return letter
 }

@@ -85,6 +85,40 @@ export function useRumoursFromGoogle() {
   }
 
   /**
+   * Build a rumour data object from parsed row values
+   */
+  const buildRumourData = (
+    row: string[],
+    index: number,
+    headers: Map<string, number>,
+    titleIdx: number,
+    sessionDateIdx: number | null,
+    gameDateIdx: number | null,
+    locationHeardIdx: number | null,
+    locationTargettedIdx: number | null,
+    ratingIdx: number | null,
+    resolvedIdx: number | null,
+    detailsIdx: number | null,
+    clampedX: number,
+    clampedY: number,
+    validRating: number | null,
+    resolved: boolean
+  ) => {
+    return {
+      session_date: sessionDateIdx !== null ? (row[sessionDateIdx]?.trim() || null) : null,
+      game_date: gameDateIdx !== null ? (row[gameDateIdx]?.trim() || null) : null,
+      location_heard: locationHeardIdx !== null ? (row[locationHeardIdx]?.trim() || null) : null,
+      location_targetted: locationTargettedIdx !== null ? (row[locationTargettedIdx]?.trim() || null) : null,
+      x: clampedX,
+      y: clampedY,
+      title: row[titleIdx].trim(),
+      rating: validRating,
+      resolved: resolved,
+      details: detailsIdx !== null ? (row[detailsIdx]?.trim() || null) : null
+    }
+  }
+
+  /**
    * Parse a single row from Google Sheets into a Rumour object
    * Uses dynamic header mapping instead of hardcoded column indices
    */
@@ -144,18 +178,16 @@ export function useRumoursFromGoogle() {
     const resolvedStr = resolvedIdx !== null ? (row[resolvedIdx] || '').toLowerCase().trim() : ''
     const resolved = ['true', 'yes', '1'].includes(resolvedStr)
 
+    // Build rumour data (used for both the rumour object and originalValues)
+    const rumourData = buildRumourData(
+      row, index, headers, titleIdx, sessionDateIdx, gameDateIdx,
+      locationHeardIdx, locationTargettedIdx, ratingIdx, resolvedIdx,
+      detailsIdx, clampedX, clampedY, validRating, resolved
+    )
+
     return {
       id: `rumour_${index + 2}`, // Row number as ID (row 1 is header)
-      session_date: sessionDateIdx !== null ? (row[sessionDateIdx]?.trim() || null) : null,
-      game_date: gameDateIdx !== null ? (row[gameDateIdx]?.trim() || null) : null,
-      location_heard: locationHeardIdx !== null ? (row[locationHeardIdx]?.trim() || null) : null,
-      location_targetted: locationTargettedIdx !== null ? (row[locationTargettedIdx]?.trim() || null) : null,
-      x: clampedX,
-      y: clampedY,
-      title: row[titleIdx].trim(),
-      rating: validRating,
-      resolved: resolved,
-      details: detailsIdx !== null ? (row[detailsIdx]?.trim() || null) : null,
+      ...rumourData,
       isPinned: true,
       isHovered: false,
       isHidden: false,
@@ -166,18 +198,7 @@ export function useRumoursFromGoogle() {
       originalY: clampedY,
       isModified: false,          // No modifications yet
       modifiedFields: new Set(),  // Track which fields are modified
-      originalValues: {           // Store original values for all editable fields
-        session_date: sessionDateIdx !== null ? (row[sessionDateIdx]?.trim() || null) : null,
-        game_date: gameDateIdx !== null ? (row[gameDateIdx]?.trim() || null) : null,
-        location_heard: locationHeardIdx !== null ? (row[locationHeardIdx]?.trim() || null) : null,
-        location_targetted: locationTargettedIdx !== null ? (row[locationTargettedIdx]?.trim() || null) : null,
-        x: clampedX,
-        y: clampedY,
-        title: row[titleIdx].trim(),
-        rating: validRating,
-        resolved: resolved,
-        details: detailsIdx !== null ? (row[detailsIdx]?.trim() || null) : null
-      }
+      originalValues: { ...rumourData } // Store original values for all editable fields
     }
   }
 

@@ -432,12 +432,13 @@ const saveEdits = () => {
     const newValue = editData.value[fieldName]
     const oldValue = props.rumour.originalValues?.[fieldName]
     
-    // Handle null/empty string equivalence
-    const normalizedNew = newValue === '' ? null : newValue
-    const normalizedOld = oldValue === '' ? null : oldValue
+    // Handle null/empty string equivalence and type coercion
+    const normalizedNew = (newValue === '' || newValue === null || newValue === undefined) ? null : newValue
+    const normalizedOld = (oldValue === '' || oldValue === null || oldValue === undefined) ? null : oldValue
     
-    if (normalizedNew !== normalizedOld) {
-      // Update the rumour object
+    // Use loose equality for better type handling
+    if (normalizedNew != normalizedOld) {
+      // Update the rumour object (note: direct mutation is acceptable here as rumour is a reactive object)
       props.rumour[fieldName] = normalizedNew
       
       // Mark field as modified
