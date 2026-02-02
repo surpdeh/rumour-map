@@ -22,22 +22,22 @@
 
     <!-- Expanded cluster - show individual pins -->
     <div v-if="isExpanded" class="cluster-expanded">
-      <RumourMarker
+      <div
         v-for="rumour in cluster.rumours"
         :key="rumour.id"
-        :rumour="rumour"
-        :map-transform="mapTransform"
-        :is-panning="isPanning"
-        @toggle-pin="(r) => $emit('toggle-pin', r)"
-        @drag-start="(data) => $emit('drag-start', data)"
-      />
+        class="cluster-pin-item"
+        :title="rumour.title"
+        @click.stop="handlePinClick(rumour)"
+      >
+        <span v-if="rumour.isPinned">📍</span>
+        <span v-else>⋮⋮</span>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import RumourMarker from './RumourMarker.vue'
 import type { ClusteredRumour, MapTransform } from '../composables/useRumourClustering'
 
 const props = defineProps<{
@@ -75,6 +75,11 @@ const handleMouseLeave = () => {
 
 const toggleExpand = () => {
   isExpanded.value = !isExpanded.value
+}
+
+const handlePinClick = (rumour: any) => {
+  // Set the rumour as hovered to show details
+  rumour.isHovered = !rumour.isHovered
 }
 </script>
 
@@ -142,5 +147,25 @@ const toggleExpand = () => {
   border-radius: 6px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
   max-width: 300px;
+}
+
+.cluster-pin-item {
+  width: var(--pin-size);
+  height: var(--pin-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(22, 27, 34, 0.9);
+  border: 1px solid #58a6ff;
+  border-radius: 6px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+}
+
+.cluster-pin-item:hover {
+  transform: scale(1.1);
+  background-color: rgba(22, 27, 34, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 </style>
