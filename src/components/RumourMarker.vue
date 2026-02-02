@@ -7,7 +7,8 @@
       'is-unpinned': !rumour.isPinned,
       'is-hovered': rumour.isHovered,
       'is-dragging': rumour.isDragging,
-      'is-modified': rumour.isModified
+      'is-modified': rumour.isModified,
+      'is-editing': isEditing
     }"
     :style="markerStyle"
     @mouseenter="handleMouseEnter"
@@ -18,7 +19,7 @@
     @touchmove="handleTouchMove"
     @keydown="handleKeyDown"
     :tabindex="0"
-    :aria-label="rumour.isModified ? `Rumour: ${rumour.title} (Position modified, pending push)` : `Rumour: ${rumour.title}`"
+    :aria-label="rumour.isModified ? `Rumour: ${rumour.title} (Modified, pending push)` : `Rumour: ${rumour.title}`"
     :aria-expanded="rumour.isHovered"
     role="article"
   >
@@ -29,19 +30,37 @@
         @click.stop="togglePin"
         :aria-label="rumour.isPinned ? 'Unpin this rumour to move it' : 'Pin this rumour'"
         :title="rumour.isPinned ? 'Click to unpin and drag' : 'Click to pin in place'"
+        :disabled="isEditing"
       >
         <span v-if="rumour.isPinned">📍</span>
         <span v-else>⋮⋮</span>
       </button>
-      <div v-if="rumour.isHovered" class="marker-title">{{ rumour.title }}</div>
+      <div v-if="rumour.isHovered && !isEditing" class="marker-title">{{ rumour.title }}</div>
+      <input
+        v-if="rumour.isHovered && isEditing"
+        v-model="editData.title"
+        class="edit-input edit-title"
+        type="text"
+        placeholder="Title"
+        @click.stop
+      />
       <span 
         v-if="rumour.isModified" 
         class="modified-indicator" 
-        aria-label="Position modified, pending push"
-        title="Position changed - click Push Updates to save"
+        aria-label="Modified, pending push"
+        :title="getModifiedFieldsText()"
       >
         ⚠️
       </span>
+      <button
+        v-if="rumour.isHovered && !isEditing"
+        class="edit-button"
+        @click.stop="startEditing"
+        aria-label="Edit rumour details"
+        title="Edit rumour details"
+      >
+        ✏️
+      </button>
     </div>
 
     <!-- Description (shown on hover or mobile tap) -->
@@ -53,43 +72,141 @@
         role="region"
         :aria-label="`Description for ${rumour.title}`"
       >
-        <!-- Metadata Section -->
-        <div v-if="hasMetadata" class="metadata-section">
-          <div v-if="rumour.session_date" class="metadata-item">
-            <span class="metadata-label">Session:</span>
-            <span class="metadata-value">{{ formatDate(rumour.session_date) }}</span>
+        <!-- Edit Mode -->
+        <div v-if="isEditing" class="edit-form">
+          <div class="edit-field">
+            <label class="edit-label">Session Date:</label>
+            <input
+              v-model="editData.session_date"
+              class="edit-input"
+              type="text"
+              placeholder="Session date"
+              @click.stop
+            />
           </div>
-          <div v-if="rumour.game_date" class="metadata-item">
-            <span class="metadata-label">Game Date:</span>
-            <span class="metadata-value">{{ rumour.game_date }}</span>
+          <div class="edit-field">
+            <label class="edit-label">Game Date:</label>
+            <input
+              v-model="editData.game_date"
+              class="edit-input"
+              type="text"
+              placeholder="Game date"
+              @click.stop
+            />
           </div>
-          <div v-if="rumour.location_heard" class="metadata-item">
-            <span class="metadata-label">Heard at:</span>
-            <span class="metadata-value">{{ rumour.location_heard }}</span>
+          <div class="edit-field">
+            <label class="edit-label">Heard at:</label>
+            <input
+              v-model="editData.location_heard"
+              class="edit-input"
+              type="text"
+              placeholder="Location where heard"
+              @click.stop
+            />
           </div>
-          <div v-if="rumour.location_targetted" class="metadata-item">
-            <span class="metadata-label">About:</span>
-            <span class="metadata-value">{{ rumour.location_targetted }}</span>
+          <div class="edit-field">
+            <label class="edit-label">About:</label>
+            <input
+              v-model="editData.location_targetted"
+              class="edit-input"
+              type="text"
+              placeholder="Location being referred to"
+              @click.stop
+            />
           </div>
-          <div v-if="rumour.rating !== null && rumour.rating !== undefined" class="metadata-item">
-            <span class="metadata-label">Rating:</span>
-            <span class="metadata-value">⭐ {{ rumour.rating }}/10</span>
+          <div class="edit-field">
+            <label class="edit-label">Rating (0-10):</label>
+            <input
+              v-model.number="editData.rating"
+              class="edit-input"
+              type="number"
+              min="0"
+              max="10"
+              step="0.1"
+              placeholder="Rating"
+              @click.stop
+            />
           </div>
-          <div class="metadata-item">
-            <span class="metadata-label">Status:</span>
-            <span :class="['metadata-value', rumour.resolved ? 'status-resolved' : 'status-unresolved']">
-              {{ rumour.resolved ? '✓ Resolved' : '○ Unresolved' }}
-            </span>
+          <div class="edit-field">
+            <label class="edit-label">Status:</label>
+            <select
+              v-model="editData.resolved"
+              class="edit-input"
+              @click.stop
+            >
+              <option :value="false">○ Unresolved</option>
+              <option :value="true">✓ Resolved</option>
+            </select>
+          </div>
+          <div class="edit-field">
+            <label class="edit-label">Details:</label>
+            <textarea
+              v-model="editData.details"
+              class="edit-input edit-textarea"
+              placeholder="Details"
+              rows="3"
+              @click.stop
+            ></textarea>
+          </div>
+          
+          <div class="edit-actions">
+            <button
+              class="save-button"
+              @click.stop="saveEdits"
+              title="Save changes"
+            >
+              💾 Save
+            </button>
+            <button
+              class="cancel-button"
+              @click.stop="cancelEditing"
+              title="Cancel editing"
+            >
+              ✕ Cancel
+            </button>
           </div>
         </div>
 
-        <!-- Details Section -->
-        <div v-if="rumour.details" class="details-section">
-          {{ rumour.details }}
-        </div>
-        <div v-else class="details-section empty">
-          <em>No details provided</em>
-        </div>
+        <!-- View Mode -->
+        <template v-else>
+          <!-- Metadata Section -->
+          <div v-if="hasMetadata" class="metadata-section">
+            <div v-if="rumour.session_date" class="metadata-item">
+              <span class="metadata-label">Session:</span>
+              <span class="metadata-value">{{ formatDate(rumour.session_date) }}</span>
+            </div>
+            <div v-if="rumour.game_date" class="metadata-item">
+              <span class="metadata-label">Game Date:</span>
+              <span class="metadata-value">{{ rumour.game_date }}</span>
+            </div>
+            <div v-if="rumour.location_heard" class="metadata-item">
+              <span class="metadata-label">Heard at:</span>
+              <span class="metadata-value">{{ rumour.location_heard }}</span>
+            </div>
+            <div v-if="rumour.location_targetted" class="metadata-item">
+              <span class="metadata-label">About:</span>
+              <span class="metadata-value">{{ rumour.location_targetted }}</span>
+            </div>
+            <div v-if="rumour.rating !== null && rumour.rating !== undefined" class="metadata-item">
+              <span class="metadata-label">Rating:</span>
+              <span class="metadata-value">⭐ {{ rumour.rating }}/10</span>
+            </div>
+            <div class="metadata-item">
+              <span class="metadata-label">Status:</span>
+              <span :class="['metadata-value', rumour.resolved ? 'status-resolved' : 'status-unresolved']">
+                {{ rumour.resolved ? '✓ Resolved' : '○ Unresolved' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Details Section -->
+          <div v-if="rumour.details" class="details-section">
+            {{ rumour.details }}
+          </div>
+          <div v-else class="details-section empty">
+            <em>No details provided</em>
+          </div>
+        </template>
       </div>
     </transition>
   </div>
@@ -97,6 +214,7 @@
 
 <script setup>
 import { ref, computed, onBeforeUnmount } from 'vue'
+import { useRumourUpdates } from '@/composables/useRumourUpdates'
 
 const props = defineProps({
   rumour: {
@@ -115,7 +233,20 @@ const props = defineProps({
 
 const emit = defineEmits(['toggle-pin', 'drag-start'])
 
+const { markFieldAsModified } = useRumourUpdates()
+
 const markerRef = ref(null)
+const isEditing = ref(false)
+const editData = ref({
+  title: '',
+  session_date: '',
+  game_date: '',
+  location_heard: '',
+  location_targetted: '',
+  rating: null,
+  resolved: false,
+  details: ''
+})
 
 // Check if rumour has any metadata to display
 const hasMetadata = computed(() => {
@@ -242,8 +373,10 @@ const handleKeyDown = (e) => {
       togglePin()
       break
     case 'Escape':
-      // Re-pin if unpinned
-      if (!props.rumour.isPinned) {
+      // Cancel editing or re-pin if unpinned
+      if (isEditing.value) {
+        cancelEditing()
+      } else if (!props.rumour.isPinned) {
         props.rumour.isPinned = true
       }
       break
@@ -252,7 +385,7 @@ const handleKeyDown = (e) => {
     case 'ArrowLeft':
     case 'ArrowRight':
       // Move unpinned rumours with arrow keys
-      if (!props.rumour.isPinned) {
+      if (!props.rumour.isPinned && !isEditing.value) {
         e.preventDefault()
         const step = 10 // pixels in map coordinates
         
@@ -273,6 +406,69 @@ const handleKeyDown = (e) => {
       }
       break
   }
+}
+
+// Edit mode functions
+const startEditing = () => {
+  isEditing.value = true
+  // Copy current values to edit data
+  editData.value = {
+    title: props.rumour.title,
+    session_date: props.rumour.session_date || '',
+    game_date: props.rumour.game_date || '',
+    location_heard: props.rumour.location_heard || '',
+    location_targetted: props.rumour.location_targetted || '',
+    rating: props.rumour.rating,
+    resolved: props.rumour.resolved,
+    details: props.rumour.details || ''
+  }
+}
+
+const saveEdits = () => {
+  // Check what fields have changed and mark them as modified
+  const editableFields = ['title', 'session_date', 'game_date', 'location_heard', 'location_targetted', 'rating', 'resolved', 'details']
+  
+  editableFields.forEach(fieldName => {
+    const newValue = editData.value[fieldName]
+    const oldValue = props.rumour.originalValues?.[fieldName]
+    
+    // Handle null/empty string equivalence
+    const normalizedNew = newValue === '' ? null : newValue
+    const normalizedOld = oldValue === '' ? null : oldValue
+    
+    if (normalizedNew !== normalizedOld) {
+      // Update the rumour object
+      props.rumour[fieldName] = normalizedNew
+      
+      // Mark field as modified
+      markFieldAsModified(props.rumour, fieldName)
+    }
+  })
+  
+  isEditing.value = false
+}
+
+const cancelEditing = () => {
+  isEditing.value = false
+  editData.value = {
+    title: '',
+    session_date: '',
+    game_date: '',
+    location_heard: '',
+    location_targetted: '',
+    rating: null,
+    resolved: false,
+    details: ''
+  }
+}
+
+// Get a text description of modified fields
+const getModifiedFieldsText = () => {
+  if (!props.rumour.modifiedFields || props.rumour.modifiedFields.size === 0) {
+    return 'Position changed - click Push Updates to save'
+  }
+  const fields = Array.from(props.rumour.modifiedFields).join(', ')
+  return `Modified fields: ${fields} - click Push Updates to save`
 }
 
 // Cleanup on unmount
@@ -331,6 +527,18 @@ onBeforeUnmount(() => {
   border-color: #d29922;
   border-width: 2px;
   box-shadow: 0 0 0 2px rgba(210, 153, 34, 0.2), 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.rumour-marker.is-editing {
+  background-color: rgba(22, 27, 34, 0.98);
+  width: auto;
+  max-width: 350px;
+  min-width: 300px;
+  height: auto;
+  padding: 0.5rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  display: block;
+  border-color: #1f6feb;
 }
 
 .rumour-marker.is-dragging {
@@ -467,6 +675,123 @@ onBeforeUnmount(() => {
 .details-section.empty {
   color: #6e7681;
   font-style: italic;
+}
+
+/* Edit button */
+.edit-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 0.1s;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.edit-button:hover {
+  transform: scale(1.2);
+}
+
+.edit-button:active {
+  transform: scale(0.9);
+}
+
+.pin-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Edit form */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.edit-label {
+  color: #8b949e;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.edit-input {
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  color: #c9d1d9;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: inherit;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: #1f6feb;
+}
+
+.edit-input::placeholder {
+  color: #6e7681;
+}
+
+.edit-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.edit-textarea {
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #30363d;
+}
+
+.save-button,
+.cancel-button {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-button {
+  background-color: #238636;
+  color: white;
+}
+
+.save-button:hover {
+  background-color: #2ea043;
+}
+
+.cancel-button {
+  background-color: #6e7681;
+  color: white;
+}
+
+.cancel-button:hover {
+  background-color: #8b949e;
 }
 
 /* Expand transition */
