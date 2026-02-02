@@ -45,7 +45,9 @@ function distance(x1: number, y1: number, x2: number, y2: number): number {
 
 /**
  * Naive clustering algorithm: groups rumours within 100px radius
- * Uses greedy approach - first rumour becomes cluster center
+ * The first rumour in each pass initiates a new cluster, then all
+ * nearby rumours (within radius) are added to it. The cluster center
+ * is calculated as the centroid (average position) of all rumours in the cluster.
  */
 function clusterRumours(
   rumours: Rumour[],

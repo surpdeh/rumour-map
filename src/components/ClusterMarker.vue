@@ -79,13 +79,17 @@ const toggleExpand = () => {
 </script>
 
 <style scoped>
+:root {
+  --pin-size: 35px;
+}
+
 .cluster-marker {
   position: absolute;
   background-color: rgba(88, 166, 255, 0.9);
   border: 2px solid #58a6ff;
   border-radius: 50%;
-  width: 35px;
-  height: 35px;
+  width: var(--pin-size);
+  height: var(--pin-size);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -130,7 +134,7 @@ const toggleExpand = () => {
 .cluster-expanded {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(auto-fit, 35px);
+  grid-template-columns: repeat(auto-fit, var(--pin-size));
   gap: 0.5rem;
   padding: 0.5rem;
   background-color: rgba(22, 27, 34, 0.95);

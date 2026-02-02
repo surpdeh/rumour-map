@@ -290,14 +290,18 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+:root {
+  --pin-size: 35px;
+}
+
 .rumour-marker {
   position: absolute;
   background-color: rgba(22, 27, 34, 0.9);
   border: 1px solid #58a6ff;
   border-radius: 6px;
   padding: 0.25rem;
-  width: 35px;
-  height: 35px;
+  width: var(--pin-size);
+  height: var(--pin-size);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease-out;
   transform-origin: top left;

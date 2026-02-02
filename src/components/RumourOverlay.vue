@@ -25,11 +25,11 @@
 </template>
 
 <script setup>
-import { toRef } from "vue";
-import { useRumourDrag } from "../composables/useRumourDrag";
-import { useRumourClustering } from "../composables/useRumourClustering";
-import RumourMarker from "./RumourMarker.vue";
-import ClusterMarker from "./ClusterMarker.vue";
+import { toRef } from 'vue';
+import { useRumourDrag } from '../composables/useRumourDrag';
+import { useRumourClustering } from '../composables/useRumourClustering';
+import RumourMarker from './RumourMarker.vue';
+import ClusterMarker from './ClusterMarker.vue';
 
 const props = defineProps({
   rumours: {

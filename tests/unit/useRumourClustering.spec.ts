@@ -215,10 +215,10 @@ describe('useRumourClustering', () => {
     expect(clusters.value).toHaveLength(1)
     
     // Center should be at (150, 100) in map space
-    // Which is (75, 50) in screen space with scale 0.5
+    // Screen coordinates: (150 * 0.5 + 0, 100 * 0.5 + 0) = (75, 50)
     const cluster = clusters.value[0]
-    expect(cluster.screenX).toBe(75) // (150 * 0.5 + 0)
-    expect(cluster.screenY).toBe(50) // (100 * 0.5 + 0)
+    expect(cluster.screenX).toBe(75)
+    expect(cluster.screenY).toBe(50)
   })
 
   it('should handle empty rumour list', () => {
