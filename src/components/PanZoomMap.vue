@@ -121,6 +121,10 @@ const touchStartDistance = ref(0);
 const touchStartScale = ref(1);
 const touches = ref([]);
 
+// Transformation state tracking
+const isTransforming = ref(false);
+let transformDebounceTimer = null;
+
 const contentStyle = computed(() => ({
   transform: `translate(${translateX.value}px, ${translateY.value}px) scale(${scale.value})`,
   transformOrigin: "0 0",
@@ -134,7 +138,26 @@ const mapTransform = computed(() => ({
   translateX: translateX.value,
   translateY: translateY.value,
   isPanning: isPanning.value,
+  isTransforming: isTransforming.value,
 }));
+
+/**
+ * Mark map as transforming and set up debounce timer
+ * to detect when transformation stops
+ */
+const markTransforming = () => {
+  isTransforming.value = true;
+  
+  // Clear existing timer
+  if (transformDebounceTimer) {
+    clearTimeout(transformDebounceTimer);
+  }
+  
+  // Set new timer to mark transformation as stopped after 500ms
+  transformDebounceTimer = setTimeout(() => {
+    isTransforming.value = false;
+  }, 500);
+};
 
 const onImageLoad = () => {
   imageLoaded.value = true;
@@ -188,6 +211,7 @@ const handlePan = (e) => {
 
   translateX.value = e.clientX - startPoint.value.x;
   translateY.value = e.clientY - startPoint.value.y;
+  markTransforming();
 };
 
 const endPan = () => {
@@ -215,6 +239,7 @@ const handleWheel = (e) => {
     // Natural scrolling: scroll up moves content up, scroll down moves content down
     translateX.value -= e.deltaX;
     translateY.value -= e.deltaY;
+    markTransforming();
   } else {
     // Mouse wheel - zoom in/out
     const rect = container.value.getBoundingClientRect();
@@ -247,6 +272,7 @@ const zoom = (delta, originX, originY) => {
   translateY.value -= (originY - translateY.value) * (scaleDiff / oldScale);
 
   scale.value = newScale;
+  markTransforming();
 };
 
 const zoomIn = () => {
@@ -287,6 +313,7 @@ const handleTouchMove = (e) => {
     // Pan
     translateX.value = e.touches[0].clientX - startPoint.value.x;
     translateY.value = e.touches[0].clientY - startPoint.value.y;
+    markTransforming();
   } else if (e.touches.length === 2) {
     // Pinch zoom
     const currentDistance = getTouchDistance(e.touches[0], e.touches[1]);
@@ -310,6 +337,7 @@ const handleTouchMove = (e) => {
       translateY.value -=
         (centerY - translateY.value) * (scaleDiff / scale.value);
       scale.value = newScale;
+      markTransforming();
     }
   }
   e.preventDefault();
@@ -364,6 +392,9 @@ onUnmounted(() => {
   window.removeEventListener("resize", fitToScreen);
   document.removeEventListener("mousemove", handlePan);
   document.removeEventListener("mouseup", endPan);
+  if (transformDebounceTimer) {
+    clearTimeout(transformDebounceTimer);
+  }
 });
 </script>
 
