@@ -1,5 +1,5 @@
 <template>
-  <div class="rumour-overlay">
+  <div class="rumour-overlay" v-show="!mapTransform.isTransforming">
     <!-- Clustered rumour markers -->
     <template v-for="cluster in clusters" :key="cluster.id">
       <!-- Single rumour (no cluster) -->
