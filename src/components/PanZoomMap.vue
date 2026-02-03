@@ -153,10 +153,10 @@ const markTransforming = () => {
     clearTimeout(transformDebounceTimer);
   }
   
-  // Set new timer to mark transformation as stopped after 500ms
+  // Set new timer to mark transformation as stopped after 100ms
   transformDebounceTimer = setTimeout(() => {
     isTransforming.value = false;
-  }, 500);
+  }, 100);
 };
 
 const onImageLoad = () => {
@@ -289,6 +289,105 @@ const resetView = () => {
   fitToScreen();
 };
 
+/**
+ * Set zoom to a specific percentage
+ */
+const setZoomPercent = (percent) => {
+  if (!container.value) return;
+  
+  const targetScale = percent / 100;
+  const rect = container.value.getBoundingClientRect();
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  
+  const oldScale = scale.value;
+  const newScale = Math.max(
+    props.minScale,
+    Math.min(props.maxScale, targetScale)
+  );
+  
+  if (newScale === oldScale) return;
+  
+  const scaleDiff = newScale - oldScale;
+  
+  // Adjust translation to zoom towards the center
+  translateX.value -= (centerX - translateX.value) * (scaleDiff / oldScale);
+  translateY.value -= (centerY - translateY.value) * (scaleDiff / oldScale);
+  
+  scale.value = newScale;
+  markTransforming();
+};
+
+/**
+ * Pan the map by a fixed amount in pixels
+ */
+const panBy = (deltaX, deltaY) => {
+  translateX.value += deltaX;
+  translateY.value += deltaY;
+  markTransforming();
+};
+
+/**
+ * Handle keyboard shortcuts
+ */
+const handleKeyDown = (e) => {
+  // Don't handle keyboard shortcuts if user is typing in an input
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+    return;
+  }
+  
+  const panAmount = 50; // pixels to pan per keypress
+  
+  switch (e.key) {
+    case 'ArrowLeft':
+      e.preventDefault();
+      panBy(panAmount, 0);
+      break;
+    case 'ArrowRight':
+      e.preventDefault();
+      panBy(-panAmount, 0);
+      break;
+    case 'ArrowUp':
+      e.preventDefault();
+      panBy(0, panAmount);
+      break;
+    case 'ArrowDown':
+      e.preventDefault();
+      panBy(0, -panAmount);
+      break;
+    case '+':
+    case '=':
+      e.preventDefault();
+      zoomIn();
+      break;
+    case '-':
+    case '_':
+      e.preventDefault();
+      zoomOut();
+      break;
+    case '1':
+      e.preventDefault();
+      resetView();
+      break;
+    case '2':
+      e.preventDefault();
+      setZoomPercent(40);
+      break;
+    case '3':
+      e.preventDefault();
+      setZoomPercent(75);
+      break;
+    case '4':
+      e.preventDefault();
+      setZoomPercent(100);
+      break;
+    case '5':
+      e.preventDefault();
+      setZoomPercent(200);
+      break;
+  }
+};
+
 // Touch handling
 const handleTouchStart = (e) => {
   if (e.touches.length === 1) {
@@ -386,10 +485,12 @@ const handleMapClick = (e) => {
 
 onMounted(() => {
   window.addEventListener("resize", fitToScreen);
+  window.addEventListener("keydown", handleKeyDown);
 });
 
 onUnmounted(() => {
   window.removeEventListener("resize", fitToScreen);
+  window.removeEventListener("keydown", handleKeyDown);
   document.removeEventListener("mousemove", handlePan);
   document.removeEventListener("mouseup", endPan);
   if (transformDebounceTimer) {
