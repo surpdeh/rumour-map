@@ -331,8 +331,8 @@ const panBy = (deltaX, deltaY) => {
  * Handle keyboard shortcuts
  */
 const handleKeyDown = (e) => {
-  // Don't handle keyboard shortcuts if user is typing in an input
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+  // Don't handle keyboard shortcuts if user is typing in an input field
+  if (e.target.matches('input, textarea, [contenteditable]')) {
     return;
   }
   
@@ -361,11 +361,11 @@ const handleKeyDown = (e) => {
       zoomIn();
       break;
     case '-':
-    case '_':
       e.preventDefault();
       zoomOut();
       break;
     case '1':
+      // Fit to viewport
       e.preventDefault();
       resetView();
       break;
