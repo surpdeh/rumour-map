@@ -12,7 +12,7 @@ import { useAddRumourToSheets } from "./composables/useAddRumourToSheets";
 const { rumours, isLoading, error, isAuthenticated, loadRumours, refresh, getHeaderMapping } = useRumours();
 
 // Apply filtering to rumours
-const { filteredRumours, filterState, setFilter, filterMode } = useRumourFilter(rumours);
+const { filteredRumours, filterState, setFilter, filterMode, searchText, setSearchText } = useRumourFilter(rumours);
 
 // Filter out hidden rumours from the filtered set
 const visibleRumours = computed(() => {
@@ -106,6 +106,26 @@ const handleCancelAdd = () => {
           :title="`Show ${filterState.unresolvedCount} unresolved rumours`"
         >
           Unresolved ({{ filterState.unresolvedCount }})
+        </button>
+      </div>
+
+      <!-- Search Filter (when authenticated and have rumours) -->
+      <div v-if="isAuthenticated && rumours.length > 0" class="Header-item search-filter">
+        <input 
+          v-model="searchText"
+          type="text"
+          placeholder="Search rumours..."
+          class="search-input"
+          aria-label="Search rumours by title, details, or location"
+        />
+        <button 
+          v-if="searchText"
+          @click="setSearchText('')"
+          class="search-clear"
+          title="Clear search"
+          aria-label="Clear search"
+        >
+          ✕
         </button>
       </div>
 
@@ -352,5 +372,49 @@ const handleCancelAdd = () => {
 
 .filter-btn.active:hover {
   background-color: #388bfd;
+}
+
+.search-filter {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  padding: 0.375rem 2rem 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  width: 200px;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #1f6feb;
+  box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.2);
+}
+
+.search-input::placeholder {
+  color: #6e7681;
+}
+
+.search-clear {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: #8b949e;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.25rem;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.search-clear:hover {
+  color: #c9d1d9;
 }
 </style>

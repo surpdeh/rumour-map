@@ -7,7 +7,7 @@ import type { Rumour, RumourFilterState } from '@/types/rumour'
 export type FilterMode = 'all' | 'resolved' | 'unresolved'
 
 /**
- * Composable for filtering rumours by resolution status
+ * Composable for filtering rumours by resolution status and text search
  * Provides filter state management and filtered rumour computation
  * 
  * @param rumours - Reactive array of rumours to filter
@@ -16,6 +16,9 @@ export type FilterMode = 'all' | 'resolved' | 'unresolved'
 export function useRumourFilter(rumours: { value: Rumour[] }) {
   // Filter mode state (all/resolved/unresolved)
   const filterMode = ref<FilterMode>('all')
+  
+  // Text search state
+  const searchText = ref<string>('')
 
   /**
    * Set the current filter mode
@@ -26,22 +29,52 @@ export function useRumourFilter(rumours: { value: Rumour[] }) {
   }
 
   /**
-   * Compute filtered rumours based on current filter mode
+   * Set the text search filter
+   * @param text - The text to search for
+   */
+  const setSearchText = (text: string) => {
+    searchText.value = text
+  }
+
+  /**
+   * Compute filtered rumours based on current filter mode and text search
    */
   const filteredRumours = computed(() => {
-    if (filterMode.value === 'all') {
-      return rumours.value
+    let filtered = rumours.value
+
+    // Apply resolution status filter
+    if (filterMode.value !== 'all') {
+      filtered = filtered.filter(rumour => {
+        const isResolved = rumour.resolved === true
+        
+        if (filterMode.value === 'resolved') {
+          return isResolved
+        } else {
+          return !isResolved
+        }
+      })
     }
 
-    return rumours.value.filter(rumour => {
-      const isResolved = rumour.resolved === true
-      
-      if (filterMode.value === 'resolved') {
-        return isResolved
-      } else {
-        return !isResolved
-      }
-    })
+    // Apply text search filter
+    if (searchText.value.trim()) {
+      const searchLower = searchText.value.toLowerCase()
+      filtered = filtered.filter(rumour => {
+        // Search across title, details, and location fields
+        const searchableText = [
+          rumour.title,
+          rumour.details,
+          rumour.location_heard,
+          rumour.location_targetted
+        ]
+          .filter(Boolean) // Remove null/undefined values
+          .join(' ')
+          .toLowerCase()
+        
+        return searchableText.includes(searchLower)
+      })
+    }
+
+    return filtered
   })
 
   /**
@@ -66,6 +99,8 @@ export function useRumourFilter(rumours: { value: Rumour[] }) {
   return {
     filterMode,
     setFilter,
+    searchText,
+    setSearchText,
     filteredRumours,
     filterState
   }
