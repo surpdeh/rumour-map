@@ -315,26 +315,29 @@ describe('useRumourFilter', () => {
     })
 
     it('handles rumours with null details field', () => {
-      // Add a rumour with null details
-      sampleRumours.value.push({
-        id: '5',
-        session_date: '2024-01-17',
-        game_date: '1372 DR',
-        location_heard: 'Mirabar',
-        location_targetted: null,
-        x: 3000,
-        y: 4000,
-        title: 'Rumour without details',
-        rating: 7,
-        resolved: false,
-        details: null,
-        isPinned: true,
-        isHovered: false,
-        isHidden: false,
-        isDragging: false
-      })
+      // Create a fresh copy with an additional rumour
+      const testRumours = ref([
+        ...sampleRumours.value,
+        {
+          id: '5',
+          session_date: '2024-01-17',
+          game_date: '1372 DR',
+          location_heard: 'Mirabar',
+          location_targetted: null,
+          x: 3000,
+          y: 4000,
+          title: 'Rumour without details',
+          rating: 7,
+          resolved: false,
+          details: null,
+          isPinned: true,
+          isHovered: false,
+          isHidden: false,
+          isDragging: false
+        }
+      ])
 
-      const { setSearchText, filteredRumours } = useRumourFilter(sampleRumours)
+      const { setSearchText, filteredRumours } = useRumourFilter(testRumours)
       
       setSearchText('without details')
       
