@@ -23,7 +23,7 @@ This repository contains a Vue.js 3 application for viewing high-resolution maps
 ```
 rumour-map/
 ├── .github/
-│   ├── workflows/       # CI/CD workflows (deploy, preview)
+│   ├── workflows/       # CI/CD workflows
 │   ├── agents/          # Spec-kit agent definitions
 │   └── prompts/         # Spec-kit prompts
 ├── .specify/
@@ -286,7 +286,6 @@ Examples:
 ## Deployment
 
 - **Production**: Auto-deploys to GitHub Pages on push to `main`
-- **PR Previews**: Every PR gets a preview at `https://surpdeh.github.io/rumour-map/pr-{number}/`
 - **Environment Variables**: Configure in `.env.local` (not committed)
 
 ## Common Pitfalls to Avoid
