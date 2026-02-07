@@ -130,6 +130,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import HarptosDatePicker from './HarptosDatePicker.vue'
 
 interface RumourFormData {
   title: string
