@@ -10,6 +10,7 @@ interface NewRumourData {
   game_date: string | null
   location_heard: string | null
   location_targetted: string | null
+  is_a_place: boolean
   rating: number | null
   resolved: boolean
   x: number
@@ -66,6 +67,9 @@ export function useAddRumourToSheets() {
           'x': data.x,
           'y': data.y,
           'title': data.title,
+          'is_a_place': data.is_a_place ? 'TRUE' : 'FALSE',
+          'is a place': data.is_a_place ? 'TRUE' : 'FALSE',
+          'place': data.is_a_place ? 'TRUE' : 'FALSE',
           'rating': data.rating !== null ? data.rating : '',
           'resolved': data.resolved ? 'TRUE' : 'FALSE',
           'details': data.details || '',
@@ -81,9 +85,9 @@ export function useAddRumourToSheets() {
           }
         }
       } else {
-        // Fallback: use hardcoded column order (A-J)
+        // Fallback: use hardcoded column order (A-K)
         // A: session_date, B: game_date, C: location_heard, D: location_targetted
-        // E: X, F: Y, G: title, H: rating, I: resolved, J: details
+        // E: X, F: Y, G: title, H: is_a_place, I: rating, J: resolved, K: details
         values = [
           data.session_date || '',
           data.game_date || '',
@@ -92,6 +96,7 @@ export function useAddRumourToSheets() {
           data.x,
           data.y,
           data.title,
+          data.is_a_place ? 'TRUE' : 'FALSE',
           data.rating !== null ? data.rating : '',
           data.resolved ? 'TRUE' : 'FALSE',
           data.details || ''

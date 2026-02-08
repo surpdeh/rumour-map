@@ -393,8 +393,8 @@ export function useRumourUpdates() {
   const getFieldValue = (rumour: Rumour, fieldName: string): any => {
     const value = (rumour as any)[fieldName]
     
-    // Convert boolean resolved to string for sheets
-    if (fieldName === 'resolved') {
+    // Convert boolean fields to string for sheets
+    if (fieldName === 'resolved' || fieldName === 'is_a_place') {
       return value ? 'TRUE' : 'FALSE'
     }
     

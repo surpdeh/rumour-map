@@ -96,6 +96,7 @@ export function useRumoursFromGoogle() {
     gameDateIdx: number | null,
     locationHeardIdx: number | null,
     locationTargettedIdx: number | null,
+    isAPlace: boolean,
     ratingIdx: number | null,
     resolvedIdx: number | null,
     detailsIdx: number | null,
@@ -112,6 +113,7 @@ export function useRumoursFromGoogle() {
       x: clampedX,
       y: clampedY,
       title: row[titleIdx].trim(),
+      is_a_place: isAPlace,
       rating: validRating,
       resolved: resolved,
       details: detailsIdx !== null ? (row[detailsIdx]?.trim() || null) : null
@@ -174,9 +176,14 @@ export function useRumoursFromGoogle() {
     const gameDateIdx = getColumnIndex(headers, 'game_date', 'game date', 'date')
     const locationHeardIdx = getColumnIndex(headers, 'location_heard', 'location heard', 'heard at')
     const locationTargettedIdx = getColumnIndex(headers, 'location_targetted', 'location targetted', 'location targeted', 'about', 'target')
+    const isAPlaceIdx = getColumnIndex(headers, 'is_a_place', 'is a place', 'place')
     const ratingIdx = getColumnIndex(headers, 'rating', 'quality', 'importance')
     const resolvedIdx = getColumnIndex(headers, 'resolved', 'status', 'complete')
     const detailsIdx = getColumnIndex(headers, 'details', 'description', 'notes')
+
+    // Parse is_a_place status
+    const isAPlaceStr = isAPlaceIdx !== null ? (row[isAPlaceIdx] || '').toLowerCase().trim() : ''
+    const isAPlace = ['true', 'yes', '1'].includes(isAPlaceStr)
 
     // Parse rating (optional)
     const ratingStr = ratingIdx !== null ? row[ratingIdx] : null
@@ -192,7 +199,7 @@ export function useRumoursFromGoogle() {
     // Build rumour data (used for both the rumour object and originalValues)
     const rumourData = buildRumourData(
       row, index, headers, titleIdx, sessionDateIdx, gameDateIdx,
-      locationHeardIdx, locationTargettedIdx, ratingIdx, resolvedIdx,
+      locationHeardIdx, locationTargettedIdx, isAPlace, ratingIdx, resolvedIdx,
       detailsIdx, clampedX, clampedY, validRating, resolved
     )
 

@@ -32,7 +32,8 @@
         :title="rumour.isPinned ? 'Click to unpin and drag' : 'Click to pin in place'"
         :disabled="isEditing"
       >
-        <span v-if="rumour.isPinned">📍</span>
+        <span v-if="rumour.is_a_place">⌘</span>
+        <span v-else-if="rumour.isPinned">📍</span>
         <span v-else>🔀</span>
       </button>
       <div v-if="rumour.isHovered && !isEditing" class="marker-title">{{ rumour.title }}</div>
@@ -124,6 +125,17 @@
               placeholder="Rating"
               @click.stop
             />
+          </div>
+          <div class="edit-field edit-field-checkbox">
+            <label class="checkbox-label">
+              <input
+                v-model="editData.is_a_place"
+                type="checkbox"
+                class="edit-checkbox"
+                @click.stop
+              />
+              <span>Place</span>
+            </label>
           </div>
           <div class="edit-field">
             <label class="edit-label">Status:</label>
@@ -242,6 +254,7 @@ const editData = ref({
   game_date: '',
   location_heard: '',
   location_targetted: '',
+  is_a_place: false,
   rating: null,
   resolved: false,
   details: ''
@@ -433,6 +446,7 @@ const startEditing = () => {
     game_date: props.rumour.game_date || '',
     location_heard: props.rumour.location_heard || '',
     location_targetted: props.rumour.location_targetted || '',
+    is_a_place: props.rumour.is_a_place,
     rating: props.rumour.rating,
     resolved: props.rumour.resolved,
     details: props.rumour.details || ''
@@ -441,7 +455,7 @@ const startEditing = () => {
 
 const saveEdits = () => {
   // Check what fields have changed and mark them as modified
-  const editableFields = ['title', 'session_date', 'game_date', 'location_heard', 'location_targetted', 'rating', 'resolved', 'details']
+  const editableFields = ['title', 'session_date', 'game_date', 'location_heard', 'location_targetted', 'is_a_place', 'rating', 'resolved', 'details']
   
   editableFields.forEach(fieldName => {
     const newValue = editData.value[fieldName]
@@ -474,6 +488,7 @@ const cancelEditing = () => {
     game_date: '',
     location_heard: '',
     location_targetted: '',
+    is_a_place: false,
     rating: null,
     resolved: false,
     details: ''
@@ -736,6 +751,26 @@ onBeforeUnmount(() => {
 
 .edit-field-full {
   grid-column: 1 / -1;
+}
+
+.edit-field-checkbox {
+  flex-direction: row;
+  align-items: center;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #c9d1d9;
+  font-size: 0.75rem;
+}
+
+.edit-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
 }
 
 .edit-label {
