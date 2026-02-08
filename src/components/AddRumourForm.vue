@@ -46,8 +46,9 @@
 
           <div class="form-group">
             <label for="game_date" class="form-label">Game Date (Harptos Calendar)</label>
-            <HarptosDatePicker
+            <HarptosDateInput
               v-model="formData.game_date"
+              placeholder="e.g., 15 Hammer, 1492 DR"
             />
           </div>
         </div>
@@ -126,7 +127,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import HarptosDatePicker from './HarptosDatePicker.vue'
+import HarptosDateInput from './HarptosDateInput.vue'
 
 interface RumourFormData {
   title: string

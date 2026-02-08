@@ -86,8 +86,9 @@
           </div>
           <div class="edit-field edit-field-full">
             <label class="edit-label">Game Date (Harptos Calendar):</label>
-            <HarptosDatePicker
+            <HarptosDateInput
               v-model="editData.game_date"
+              placeholder="e.g., 15 Hammer, 1492 DR"
               @click.stop
             />
           </div>
@@ -212,7 +213,7 @@
 <script setup>
 import { ref, computed, onBeforeUnmount } from 'vue'
 import { useRumourUpdates } from '@/composables/useRumourUpdates'
-import HarptosDatePicker from './HarptosDatePicker.vue'
+import HarptosDateInput from './HarptosDateInput.vue'
 
 const props = defineProps({
   rumour: {
