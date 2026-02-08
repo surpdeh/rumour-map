@@ -172,7 +172,12 @@ describe('AddRumourForm', () => {
 
     await wrapper.find('#title').setValue('Minimal Rumour')
     await wrapper.find('#session_date').setValue('Session 10')
-    await wrapper.find('#game_date').setValue('Year 2')
+    
+    // For HarptosDatePicker, we need to find the component and interact with it
+    // The picker will emit update:modelValue when changed
+    const datePickerComponent = wrapper.findComponent({ name: 'HarptosDatePicker' })
+    await datePickerComponent.vm.$emit('update:modelValue', 'Year 2')
+    
     await wrapper.find('#location_heard').setValue('Tavern')
     await wrapper.find('#location_targetted').setValue('Castle')
     
