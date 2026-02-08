@@ -232,8 +232,14 @@ const handleWheel = (e) => {
     const rect = container.value.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
-    const delta = e.deltaY > 0 ? -props.zoomSpeed : props.zoomSpeed;
-    zoom(delta, mouseX, mouseY);
+    
+    // Use multiplicative zoom for pinch gestures
+    // Convert deltaY to a zoom factor: positive deltaY = zoom out, negative = zoom in
+    // A full pinch gesture (deltaY ~= 100) should result in ~40% change
+    // Factor calculation: 1.0 + (deltaY * sensitivity)
+    // For 40% change with deltaY=100: sensitivity = 0.4/100 = 0.004
+    const zoomFactor = 1.0 + (e.deltaY * -0.004);
+    zoomMultiplicative(zoomFactor, mouseX, mouseY);
   } else if (isTrackpad) {
     // Two-finger scroll on trackpad - pan the map
     // Natural scrolling: scroll up moves content up, scroll down moves content down
@@ -248,6 +254,25 @@ const handleWheel = (e) => {
     const delta = e.deltaY > 0 ? -props.zoomSpeed : props.zoomSpeed;
     zoom(delta, mouseX, mouseY);
   }
+};
+
+const zoomMultiplicative = (factor, originX, originY) => {
+  const oldScale = scale.value;
+  const newScale = Math.max(
+    props.minScale,
+    Math.min(props.maxScale, oldScale * factor),
+  );
+
+  if (newScale === oldScale) return;
+
+  const scaleDiff = newScale - oldScale;
+
+  // Adjust translation to zoom towards the origin point
+  translateX.value -= (originX - translateX.value) * (scaleDiff / oldScale);
+  translateY.value -= (originY - translateY.value) * (scaleDiff / oldScale);
+
+  scale.value = newScale;
+  markTransforming();
 };
 
 const zoom = (delta, originX, originY) => {
@@ -277,12 +302,14 @@ const zoom = (delta, originX, originY) => {
 
 const zoomIn = () => {
   const rect = container.value.getBoundingClientRect();
-  zoom(props.zoomSpeed, rect.width / 2, rect.height / 2);
+  // Use multiplicative zoom with 40% increase (factor 1.4)
+  zoomMultiplicative(1.4, rect.width / 2, rect.height / 2);
 };
 
 const zoomOut = () => {
   const rect = container.value.getBoundingClientRect();
-  zoom(-props.zoomSpeed, rect.width / 2, rect.height / 2);
+  // Use multiplicative zoom with 40% decrease (factor ~0.714)
+  zoomMultiplicative(1 / 1.4, rect.width / 2, rect.height / 2);
 };
 
 const resetView = () => {
@@ -414,19 +441,22 @@ const handleTouchMove = (e) => {
     translateY.value = e.touches[0].clientY - startPoint.value.y;
     markTransforming();
   } else if (e.touches.length === 2) {
-    // Pinch zoom
+    // Pinch zoom - use multiplicative scaling
     const currentDistance = getTouchDistance(e.touches[0], e.touches[1]);
-    const scaleDelta = (currentDistance - touchStartDistance.value) * 0.005;
-
+    // Calculate the ratio of current distance to start distance
+    // This gives us a natural multiplicative zoom factor
+    const distanceRatio = currentDistance / touchStartDistance.value;
+    
     const rect = container.value.getBoundingClientRect();
     const centerX =
       (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
     const centerY =
       (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
 
+    // Apply multiplicative zoom: new scale = start scale * distance ratio
     const newScale = Math.max(
       props.minScale,
-      Math.min(props.maxScale, touchStartScale.value + scaleDelta),
+      Math.min(props.maxScale, touchStartScale.value * distanceRatio),
     );
     const scaleDiff = newScale - scale.value;
 
