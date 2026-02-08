@@ -45,13 +45,10 @@
           </div>
 
           <div class="form-group">
-            <label for="game_date" class="form-label">Game Date</label>
-            <input
-              id="game_date"
+            <label for="game_date" class="form-label">Game Date (Harptos Calendar)</label>
+            <HarptosDateInput
               v-model="formData.game_date"
-              type="text"
-              class="form-input"
-              placeholder="e.g., Spring, Year 3"
+              placeholder="e.g., 15 Hammer, 1492 DR"
             />
           </div>
         </div>
@@ -130,6 +127,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import HarptosDateInput from './HarptosDateInput.vue'
 
 interface RumourFormData {
   title: string
