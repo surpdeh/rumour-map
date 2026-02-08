@@ -16,6 +16,7 @@ export interface Rumour {
   x: number                     // Map X coordinate (0-6500)
   y: number                     // Map Y coordinate (0-3600)
   title: string                 // Rumour title/summary
+  is_a_place: boolean           // Whether this is a place marker (shows ⌘ instead of pin)
   rating: number | null         // Quality/importance rating (0-10)
   resolved: boolean             // Whether rumour is resolved
   details: string | null        // Full rumour description
@@ -47,9 +48,10 @@ export interface GoogleSheetsRow {
   X: string                     // Column E - parsed to number
   Y: string                     // Column F - parsed to number
   title: string                 // Column G
-  rating?: string               // Column H - parsed to number
-  resolved?: string             // Column I - parsed to boolean
-  details?: string              // Column J
+  is_a_place?: string           // Column H - parsed to boolean
+  rating?: string               // Column I - parsed to number
+  resolved?: string             // Column J - parsed to boolean
+  details?: string              // Column K
 }
 
 /**

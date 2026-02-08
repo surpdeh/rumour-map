@@ -94,6 +94,19 @@
           <div class="form-group form-checkbox-group">
             <label class="checkbox-label">
               <input
+                v-model="formData.is_a_place"
+                type="checkbox"
+                class="form-checkbox"
+              />
+              <span>Place</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group form-checkbox-group">
+            <label class="checkbox-label">
+              <input
                 v-model="formData.resolved"
                 type="checkbox"
                 class="form-checkbox"
@@ -136,6 +149,7 @@ interface RumourFormData {
   game_date: string | null
   location_heard: string | null
   location_targetted: string | null
+  is_a_place: boolean
   rating: number | null
   resolved: boolean
 }
@@ -157,6 +171,7 @@ const formData = ref<RumourFormData>({
   game_date: null,
   location_heard: null,
   location_targetted: null,
+  is_a_place: false,
   rating: null,
   resolved: false
 })
@@ -174,6 +189,7 @@ watch(() => props.show, (newShow) => {
       game_date: null,
       location_heard: null,
       location_targetted: null,
+      is_a_place: false,
       rating: null,
       resolved: false
     }
@@ -198,6 +214,7 @@ const handleSubmit = () => {
     game_date: formData.value.game_date?.trim() || null,
     location_heard: formData.value.location_heard?.trim() || null,
     location_targetted: formData.value.location_targetted?.trim() || null,
+    is_a_place: formData.value.is_a_place,
     rating: formData.value.rating,
     resolved: formData.value.resolved
   }
