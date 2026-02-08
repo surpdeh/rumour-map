@@ -69,6 +69,13 @@
       >
     </div>
 
+    <!-- DIAGNOSTIC: Large scale overlay for testing -->
+    <div class="diagnostic-overlay">
+      <div class="diagnostic-scale">
+        Scale: {{ scale.toFixed(3) }}
+      </div>
+    </div>
+
     <!-- Rumour overlay -->
     <RumourOverlay :map-transform="mapTransform" :rumours="rumours" />
   </div>
@@ -565,5 +572,27 @@ onUnmounted(() => {
 
 .btn:active {
   transform: scale(0.95);
+}
+
+/* DIAGNOSTIC: Large scale overlay for testing drag behavior */
+.diagnostic-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #00ff00;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 2rem;
+  font-weight: bold;
+  z-index: 5;
+  pointer-events: none;
+  border: 2px solid #00ff00;
+}
+
+.diagnostic-scale {
+  text-align: center;
 }
 </style>
