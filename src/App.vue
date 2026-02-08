@@ -62,6 +62,12 @@ const handleCancelAdd = () => {
       <div class="Header-item">
         <h1 class="Header-title">Rumour Map</h1>
       </div>
+      <div class="Header-item">
+        <div>
+        <a href="privacy.html">Privacy Policy</a><br/>
+        <a href="tos.html">Terms of Service</a>
+        </div>
+      </div>
       <div class="Header-item Header-item--full"></div>
 
       <!-- Authentication Status -->
