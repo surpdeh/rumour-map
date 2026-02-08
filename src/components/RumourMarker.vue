@@ -250,6 +250,7 @@ const { markFieldAsModified } = useRumourUpdates()
 const markerRef = ref(null)
 const isEditing = ref(false)
 const dialogOffset = ref({ top: 0, left: 0 })
+const VIEWPORT_PADDING = 20 // Padding from viewport edges in pixels
 const editData = ref({
   title: '',
   session_date: '',
@@ -325,23 +326,23 @@ const adjustDialogPosition = async () => {
   if (dialogRect.bottom > viewportHeight) {
     // Shift dialog up to fit within viewport
     const overflow = dialogRect.bottom - viewportHeight
-    offsetTop = -overflow - 20 // Add 20px padding from bottom
+    offsetTop = -overflow - VIEWPORT_PADDING
     
     // Ensure dialog doesn't go above top of viewport
-    if (dialogRect.top + offsetTop < 20) {
-      offsetTop = 20 - dialogRect.top
+    if (dialogRect.top + offsetTop < VIEWPORT_PADDING) {
+      offsetTop = VIEWPORT_PADDING - dialogRect.top
     }
   }
   
   // Check if dialog extends beyond right edge
   if (dialogRect.right > viewportWidth) {
     const overflow = dialogRect.right - viewportWidth
-    offsetLeft = -overflow - 20 // Add 20px padding from right
+    offsetLeft = -overflow - VIEWPORT_PADDING
   }
   
   // Check if dialog extends beyond left edge
-  if (dialogRect.left + offsetLeft < 20) {
-    offsetLeft = 20 - dialogRect.left
+  if (dialogRect.left + offsetLeft < VIEWPORT_PADDING) {
+    offsetLeft = VIEWPORT_PADDING - dialogRect.left
   }
   
   dialogOffset.value = { top: offsetTop, left: offsetLeft }
@@ -575,6 +576,7 @@ onBeforeUnmount(() => {
 <style scoped>
 :root {
   --pin-size: 35px;
+  --viewport-padding: 20px;
 }
 
 .rumour-marker {
@@ -622,7 +624,7 @@ onBeforeUnmount(() => {
   max-width: 350px;
   min-width: 300px;
   height: auto;
-  max-height: calc(100vh - 40px); /* Ensure dialog fits within viewport with padding */
+  max-height: calc(100vh - calc(2 * var(--viewport-padding))); /* Ensure dialog fits within viewport with padding */
   padding: 0.5rem;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
   display: flex;
