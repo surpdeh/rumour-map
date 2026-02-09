@@ -29,25 +29,72 @@
         class="cluster-rumour-item"
         :class="{ 'is-expanded': expandedRumourId === rumour.id }"
       >
-        <!-- Accordion header: icon + title -->
-        <div 
-          class="cluster-rumour-header"
-          @click.stop="handleRumourClick(rumour)"
-          @keydown.enter.prevent="handleRumourClick(rumour)"
-          @keydown.space.prevent="handleRumourClick(rumour)"
-          :tabindex="0"
-          :aria-expanded="expandedRumourId === rumour.id"
-          :aria-label="`${rumour.title} - Press Enter or Space to expand details`"
-          role="button"
-        >
-          <span class="rumour-icon">
+        <!-- Accordion header: icon + title + controls -->
+        <div class="cluster-rumour-header">
+          <!-- Pin/Unpin button -->
+          <button
+            class="pin-button"
+            @click.stop="handleTogglePin(rumour)"
+            @mousedown.stop
+            :aria-label="rumour.isPinned ? 'Unpin this rumour to move it' : 'Pin this rumour'"
+            :title="rumour.isPinned ? 'Click to unpin and drag' : 'Click to pin in place'"
+          >
             <span v-if="rumour.is_a_place && rumour.isPinned">⌘</span>
             <span v-else-if="rumour.is_a_place && !rumour.isPinned">🔀</span>
             <span v-else-if="rumour.isPinned">📍</span>
             <span v-else>🔀</span>
+          </button>
+          
+          <!-- Title (clickable to expand) -->
+          <span 
+            class="rumour-title"
+            @click.stop="handleRumourClick(rumour)"
+            @keydown.enter.prevent="handleRumourClick(rumour)"
+            @keydown.space.prevent="handleRumourClick(rumour)"
+            :tabindex="0"
+            :aria-expanded="expandedRumourId === rumour.id"
+            :aria-label="`${rumour.title} - Press Enter or Space to expand details`"
+            role="button"
+          >
+            {{ rumour.title }}
           </span>
-          <span class="rumour-title">{{ rumour.title }}</span>
+          
+          <!-- Modified indicator -->
+          <span 
+            v-if="rumour.isModified" 
+            class="modified-indicator" 
+            aria-label="Modified, pending push"
+            :title="getModifiedFieldsText(rumour)"
+          >
+            ⚠️
+          </span>
+          
+          <!-- Edit button (only shown when expanded) -->
+          <button
+            v-if="expandedRumourId === rumour.id"
+            class="edit-button"
+            @click.stop="handleEdit(rumour)"
+            @mousedown.stop
+            aria-label="Edit rumour details"
+            title="Edit rumour details"
+          >
+            ✏️
+          </button>
+          
+          <!-- Expand indicator -->
           <span class="expand-indicator">{{ expandedRumourId === rumour.id ? '▼' : '▶' }}</span>
+          
+          <!-- Drag handle (only for unpinned rumours) -->
+          <span
+            v-if="!rumour.isPinned"
+            class="drag-handle"
+            @mousedown.stop="handleDragStart(rumour, $event)"
+            @touchstart.stop="handleDragStart(rumour, $event)"
+            :aria-label="'Drag to move rumour'"
+            title="Drag to move"
+          >
+            ⋮⋮
+          </span>
         </div>
 
         <!-- Accordion content: rumour details -->
@@ -107,7 +154,7 @@ const props = defineProps<{
   isPanning: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   'toggle-pin': [rumour: any]
   'drag-start': [data: any]
 }>()
@@ -150,6 +197,33 @@ const handleRumourClick = (rumour: any) => {
   } else {
     expandedRumourId.value = rumour.id
   }
+}
+
+const handleTogglePin = (rumour: any) => {
+  emit('toggle-pin', rumour)
+}
+
+const handleDragStart = (rumour: any, event: MouseEvent | TouchEvent) => {
+  if (!rumour.isPinned) {
+    emit('drag-start', { rumour, event })
+  }
+}
+
+const handleEdit = (rumour: any) => {
+  // Set the rumour as hovered to trigger edit mode in RumourMarker
+  // This is a temporary solution - ideally we'd handle editing directly in cluster
+  rumour.isHovered = true
+  // Note: Full edit functionality would require expanding this component
+  // For now, this allows the rumour to be edited via its own marker
+}
+
+// Get a text description of modified fields
+const getModifiedFieldsText = (rumour: any) => {
+  if (!rumour.modifiedFields || rumour.modifiedFields.size === 0) {
+    return 'Position changed - click Push Updates to save'
+  }
+  const fields = Array.from(rumour.modifiedFields).join(', ')
+  return `Modified fields: ${fields} - click Push Updates to save`
 }
 
 // Check if rumour has any metadata to display
@@ -284,18 +358,30 @@ const formatDate = (dateString: string) => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem;
-  cursor: pointer;
   user-select: none;
 }
 
 .cluster-rumour-header:hover {
-  background-color: rgba(88, 166, 255, 0.1);
+  background-color: rgba(88, 166, 255, 0.05);
 }
 
-.cluster-rumour-header:focus {
-  outline: 2px solid #58a6ff;
-  outline-offset: -2px;
-  background-color: rgba(88, 166, 255, 0.15);
+.pin-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 0.1s;
+  flex-shrink: 0;
+}
+
+.pin-button:hover {
+  transform: scale(1.2);
+}
+
+.pin-button:active {
+  transform: scale(0.9);
 }
 
 .rumour-icon {
@@ -312,6 +398,52 @@ const formatDate = (dateString: string) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.rumour-title:hover {
+  color: #58a6ff;
+}
+
+.rumour-title:focus {
+  outline: 2px solid #58a6ff;
+  outline-offset: -2px;
+  border-radius: 2px;
+}
+
+.modified-indicator {
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.edit-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.875rem;
+  line-height: 1;
+  transition: transform 0.1s;
+  flex-shrink: 0;
+}
+
+.edit-button:hover {
+  transform: scale(1.2);
+}
+
+.edit-button:active {
+  transform: scale(0.9);
 }
 
 .expand-indicator {
@@ -319,6 +451,24 @@ const formatDate = (dateString: string) => {
   font-size: 0.75rem;
   flex-shrink: 0;
   transition: transform 0.2s;
+}
+
+.drag-handle {
+  color: #8b949e;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: grab;
+  flex-shrink: 0;
+  padding: 0 0.25rem;
+  user-select: none;
+}
+
+.drag-handle:hover {
+  color: #c9d1d9;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
 }
 
 .cluster-rumour-details {
