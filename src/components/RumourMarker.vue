@@ -224,7 +224,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeUnmount } from 'vue'
+import { ref, computed, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRumourUpdates } from '@/composables/useRumourUpdates'
 import HarptosDateInput from './HarptosDateInput.vue'
 
@@ -249,6 +249,8 @@ const { markFieldAsModified } = useRumourUpdates()
 
 const markerRef = ref(null)
 const isEditing = ref(false)
+const dialogOffset = ref({ top: 0, left: 0 })
+const VIEWPORT_PADDING = 20 // Padding from viewport edges in pixels
 const editData = ref({
   title: '',
   session_date: '',
@@ -297,9 +299,61 @@ const markerStyle = computed(() => {
   const screenY = (props.rumour.y * scale) + translateY
 
   return {
-    left: `${screenX}px`,
-    top: `${screenY}px`,
+    left: `${screenX + dialogOffset.value.left}px`,
+    top: `${screenY + dialogOffset.value.top}px`,
     zIndex: props.rumour.isDragging ? 102 : (props.rumour.isHovered ? 101 : 100)
+  }
+})
+
+// Adjust dialog position to keep it within viewport when in edit mode
+const adjustDialogPosition = async () => {
+  if (!isEditing.value || !markerRef.value) {
+    dialogOffset.value = { top: 0, left: 0 }
+    return
+  }
+
+  // Wait for DOM to update with edit form
+  await nextTick()
+  
+  const dialogRect = markerRef.value.getBoundingClientRect()
+  const viewportHeight = window.innerHeight
+  const viewportWidth = window.innerWidth
+  
+  let offsetTop = 0
+  let offsetLeft = 0
+  
+  // Check if dialog extends beyond bottom of viewport
+  if (dialogRect.bottom > viewportHeight) {
+    // Shift dialog up to fit within viewport
+    const overflow = dialogRect.bottom - viewportHeight
+    offsetTop = -overflow - VIEWPORT_PADDING
+    
+    // Ensure dialog doesn't go above top of viewport
+    if (dialogRect.top + offsetTop < VIEWPORT_PADDING) {
+      offsetTop = VIEWPORT_PADDING - dialogRect.top
+    }
+  }
+  
+  // Check if dialog extends beyond right edge
+  if (dialogRect.right > viewportWidth) {
+    const overflow = dialogRect.right - viewportWidth
+    offsetLeft = -overflow - VIEWPORT_PADDING
+  }
+  
+  // Check if dialog extends beyond left edge
+  if (dialogRect.left + offsetLeft < VIEWPORT_PADDING) {
+    offsetLeft = VIEWPORT_PADDING - dialogRect.left
+  }
+  
+  dialogOffset.value = { top: offsetTop, left: offsetLeft }
+}
+
+// Watch for edit mode changes and adjust position
+watch(isEditing, async (newValue) => {
+  if (newValue) {
+    await adjustDialogPosition()
+  } else {
+    dialogOffset.value = { top: 0, left: 0 }
   }
 })
 
@@ -522,6 +576,7 @@ onBeforeUnmount(() => {
 <style scoped>
 :root {
   --pin-size: 35px;
+  --viewport-padding: 20px;
 }
 
 .rumour-marker {
@@ -569,10 +624,13 @@ onBeforeUnmount(() => {
   max-width: 350px;
   min-width: 300px;
   height: auto;
+  max-height: calc(100vh - calc(2 * var(--viewport-padding))); /* Ensure dialog fits within viewport with padding */
   padding: 0.5rem;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-  display: block;
+  display: flex;
+  flex-direction: column;
   border-color: #1f6feb;
+  overflow: hidden; /* Hide overflow on container */
 }
 
 .rumour-marker.is-dragging {
@@ -661,6 +719,9 @@ onBeforeUnmount(() => {
   margin-top: 0.5rem;
   padding-top: 0.5rem;
   border-top: 1px solid #30363d;
+  overflow-y: auto; /* Enable vertical scrolling when content overflows */
+  flex: 1; /* Allow description to grow and shrink */
+  min-height: 0; /* Important for flexbox scrolling */
 }
 
 .metadata-section {
@@ -888,6 +949,11 @@ onBeforeUnmount(() => {
     max-width: 250px;
     font-size: 0.875rem;
   }
+
+  .rumour-marker.is-editing {
+    max-width: min(350px, calc(100vw - 40px)); /* Respect viewport width on tablets */
+    min-width: min(300px, calc(100vw - 40px));
+  }
 }
 
 @media (max-width: 767px) {
@@ -900,6 +966,11 @@ onBeforeUnmount(() => {
     max-width: 200px;
     font-size: 0.75rem;
     padding: 0.375rem;
+  }
+
+  .rumour-marker.is-editing {
+    max-width: calc(100vw - 40px); /* Full width minus padding on mobile */
+    min-width: calc(100vw - 40px);
   }
 
   .marker-description {
