@@ -18,6 +18,7 @@ const createRumour = (id: string, x: number, y: number): Rumour => ({
   game_date: null,
   location_heard: null,
   location_targetted: null,
+  is_a_place: false,
   rating: null,
   resolved: false,
   isPinned: true,

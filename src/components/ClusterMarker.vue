@@ -33,8 +33,11 @@
         <div 
           class="cluster-rumour-header"
           @click.stop="handleRumourClick(rumour)"
+          @keydown.enter.prevent="handleRumourClick(rumour)"
+          @keydown.space.prevent="handleRumourClick(rumour)"
           :tabindex="0"
           :aria-expanded="expandedRumourId === rumour.id"
+          :aria-label="`${rumour.title} - Press Enter or Space to expand details`"
           role="button"
         >
           <span class="rumour-icon">
@@ -286,6 +289,12 @@ const formatDate = (dateString: string) => {
 
 .cluster-rumour-header:hover {
   background-color: rgba(88, 166, 255, 0.1);
+}
+
+.cluster-rumour-header:focus {
+  outline: 2px solid #58a6ff;
+  outline-offset: -2px;
+  background-color: rgba(88, 166, 255, 0.15);
 }
 
 .rumour-icon {
