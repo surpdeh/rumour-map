@@ -171,7 +171,8 @@ const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     if (isNaN(date.getTime())) return dateString // Return original if parsing fails
     
-    return date.toLocaleDateString('en-US', {
+    // Use browser's default locale
+    return date.toLocaleDateString(undefined, {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -396,6 +397,6 @@ const formatDate = (dateString: string) => {
 .accordion-enter-to,
 .accordion-leave-from {
   opacity: 1;
-  max-height: 500px;
+  max-height: 1000px; /* Increased to accommodate longer content */
 }
 </style>
