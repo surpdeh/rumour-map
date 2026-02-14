@@ -9,7 +9,7 @@
     :style="clusterStyle"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
-    @click="toggleExpand"
+    @click.stop="toggleExpand"
     :tabindex="0"
     :aria-label="`Cluster of ${cluster.rumours.length} rumours`"
     :aria-expanded="isExpanded"
