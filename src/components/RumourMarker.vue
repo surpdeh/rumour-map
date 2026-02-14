@@ -35,7 +35,7 @@
         :title="isDragMode ? 'Click to exit drag mode' : 'Click to enable dragging'"
         :disabled="isEditing"
       >
-        <span v-if="isDragMode">⋮⋮</span>
+        <span v-if="isDragMode" class="drag-handle">⋮⋮</span>
         <span v-else-if="rumour.is_a_place" class="place-marker">⌘</span>
         <span v-else>📍</span>
       </button>
@@ -421,10 +421,10 @@ const handleButtonMouseDown = (e) => {
       const dy = Math.abs(moveEvent.clientY - startY)
       
       if (dx > threshold || dy > threshold) {
-        // It's a drag, not a click
+        // It's a drag, not a click - pass the move event for accurate coordinates
         document.removeEventListener('mousemove', handleMove)
         document.removeEventListener('mouseup', handleUp)
-        emit('drag-start', { rumour: props.rumour, event: e })
+        emit('drag-start', { rumour: props.rumour, event: moveEvent })
       }
     }
     
@@ -734,13 +734,13 @@ onBeforeUnmount(() => {
 }
 
 /* Drag handle - white/light color for visibility */
-.pin-button span:first-child {
+.pin-button .drag-handle {
   color: #c9d1d9;
 }
 
 /* Place marker - red for visibility */
-.place-marker {
-  color: #ff6b6b !important;
+.pin-button .place-marker {
+  color: #ff6b6b;
 }
 
 .rumour-marker.is-hovered .pin-button {

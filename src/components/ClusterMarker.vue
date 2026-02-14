@@ -44,7 +44,7 @@
             :aria-label="isDragModeForRumour(rumour.id) ? 'Exit drag mode' : 'Enter drag mode'"
             :title="isDragModeForRumour(rumour.id) ? 'Click to exit drag mode' : 'Click to enable dragging'"
           >
-            <span v-if="isDragModeForRumour(rumour.id)">⋮⋮</span>
+            <span v-if="isDragModeForRumour(rumour.id)" class="drag-handle">⋮⋮</span>
             <span v-else-if="rumour.is_a_place" class="place-marker">⌘</span>
             <span v-else>📍</span>
           </button>
@@ -436,12 +436,12 @@ const formatDate = (dateString: string) => {
 }
 
 /* Drag handle - white/light color for visibility */
-.pin-button span:first-child {
+.pin-button .drag-handle {
   color: #c9d1d9;
 }
 
 /* Place marker - red for visibility */
-.cluster-rumour-header .pin-button .place-marker {
+.pin-button .place-marker {
   color: #ff6b6b;
 }
 
