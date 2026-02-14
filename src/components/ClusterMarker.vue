@@ -36,8 +36,8 @@
             class="pin-button"
             @click.stop="handleTogglePin(rumour)"
             @mousedown.stop
-            :aria-label="rumour.isPinned ? 'Unpin this rumour to move it' : 'Pin this rumour'"
-            :title="rumour.isPinned ? 'Click to unpin and drag' : 'Click to pin in place'"
+            :aria-label="rumour.isPinned ? 'Unpin this rumour' : 'Pin this rumour'"
+            :title="rumour.isPinned ? 'Click to unpin' : 'Click to pin in place'"
           >
             <span v-if="rumour.is_a_place && rumour.isPinned">⌘</span>
             <span v-else-if="rumour.is_a_place && !rumour.isPinned">🔀</span>
@@ -81,12 +81,21 @@
             ✏️
           </button>
           
-          <!-- Expand indicator -->
-          <span class="expand-indicator">{{ expandedRumourId === rumour.id ? '▼' : '▶' }}</span>
+          <!-- Expand indicator (clickable) -->
+          <span 
+            class="expand-indicator"
+            @click.stop="handleRumourClick(rumour)"
+            @keydown.enter.prevent="handleRumourClick(rumour)"
+            @keydown.space.prevent="handleRumourClick(rumour)"
+            :tabindex="0"
+            :aria-label="'Toggle rumour details'"
+            role="button"
+          >
+            {{ expandedRumourId === rumour.id ? '▼' : '▶' }}
+          </span>
           
-          <!-- Drag handle (only for unpinned rumours) -->
+          <!-- Drag handle (always shown) -->
           <span
-            v-if="!rumour.isPinned"
             class="drag-handle"
             @mousedown.stop="handleDragStart(rumour, $event)"
             @touchstart.stop="handleDragStart(rumour, $event)"
@@ -204,9 +213,8 @@ const handleTogglePin = (rumour: any) => {
 }
 
 const handleDragStart = (rumour: any, event: MouseEvent | TouchEvent) => {
-  if (!rumour.isPinned) {
-    emit('drag-start', { rumour, event })
-  }
+  // Allow dragging regardless of pinned state
+  emit('drag-start', { rumour, event })
 }
 
 const handleEdit = (rumour: any) => {
@@ -451,6 +459,19 @@ const formatDate = (dateString: string) => {
   font-size: 0.75rem;
   flex-shrink: 0;
   transition: transform 0.2s;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 2px;
+}
+
+.expand-indicator:hover {
+  color: #c9d1d9;
+  background-color: rgba(88, 166, 255, 0.1);
+}
+
+.expand-indicator:focus {
+  outline: 2px solid #58a6ff;
+  outline-offset: -2px;
 }
 
 .drag-handle {

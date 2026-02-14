@@ -28,8 +28,8 @@
       <button
         class="pin-button"
         @click.stop="togglePin"
-        :aria-label="rumour.isPinned ? 'Unpin this rumour to move it' : 'Pin this rumour'"
-        :title="rumour.isPinned ? 'Click to unpin and drag' : 'Click to pin in place'"
+        :aria-label="rumour.isPinned ? 'Unpin this rumour' : 'Pin this rumour'"
+        :title="rumour.isPinned ? 'Click to unpin' : 'Click to pin in place'"
         :disabled="isEditing"
       >
         <span v-if="rumour.is_a_place && rumour.isPinned" class="place-marker">⌘</span>
@@ -63,6 +63,16 @@
       >
         ✏️
       </button>
+      <span
+        v-if="rumour.isHovered && !isEditing"
+        class="drag-handle"
+        @mousedown.stop="handleDragMouseDown"
+        @touchstart.stop="handleDragTouchStart"
+        :aria-label="'Drag to move rumour'"
+        title="Drag to move"
+      >
+        ⋮⋮
+      </span>
     </div>
 
     <!-- Description (shown on hover or mobile tap) -->
@@ -405,23 +415,32 @@ const handleMouseDown = (e) => {
     return
   }
   
-  if (!props.rumour.isPinned && e.button === 0) {
+  // Removed auto-drag on mousedown - now only via drag handle
+}
+
+const handleDragMouseDown = (e) => {
+  // Drag from handle - works regardless of pinned state
+  if (!isEditing.value) {
+    emit('drag-start', { rumour: props.rumour, event: e })
+  }
+}
+
+const handleDragTouchStart = (e) => {
+  // Drag from handle - works regardless of pinned state
+  if (!isEditing.value) {
     emit('drag-start', { rumour: props.rumour, event: e })
   }
 }
 
 // Touch handling
 const handleTouchStart = (e) => {
-  // For pinned rumours, implement long-press to unpin (mobile UX)
-  if (props.rumour.isPinned) {
+  // For touch on main marker, just toggle expansion on tap
+  if (props.rumour.isPinned || !props.rumour.isPinned) {
     longPressTimeout.value = setTimeout(() => {
       // Toggle expansion on tap (mobile behavior)
       props.rumour.isHovered = !props.rumour.isHovered
       longPressTimeout.value = null
     }, 150)
-  } else {
-    // For unpinned rumours, start drag immediately
-    emit('drag-start', { rumour: props.rumour, event: e })
   }
 }
 
@@ -786,7 +805,34 @@ onBeforeUnmount(() => {
   line-height: 1;
   transition: transform 0.1s;
   flex-shrink: 0;
-  margin-left: auto;
+}
+
+.edit-button:hover {
+  transform: scale(1.2);
+}
+
+.edit-button:active {
+  transform: scale(0.9);
+}
+
+/* Drag handle */
+.drag-handle {
+  color: #8b949e;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: grab;
+  flex-shrink: 0;
+  padding: 0 0.25rem;
+  user-select: none;
+  margin-left: 0.25rem;
+}
+
+.drag-handle:hover {
+  color: #c9d1d9;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
 }
 
 .edit-button:hover {
