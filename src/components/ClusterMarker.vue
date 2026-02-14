@@ -40,7 +40,8 @@
           <button
             class="pin-button"
             @click.stop="handleToggleDragMode(rumour)"
-            @mousedown.stop
+            @mousedown="handleButtonMouseDown(rumour, $event)"
+            @touchstart="handleButtonTouchStart(rumour, $event)"
             :aria-label="isDragModeForRumour(rumour.id) ? 'Exit drag mode' : 'Enter drag mode'"
             :title="isDragModeForRumour(rumour.id) ? 'Click to exit drag mode' : 'Click to enable dragging'"
           >
@@ -228,6 +229,46 @@ const handleDragStart = (rumour: any, event: MouseEvent | TouchEvent) => {
   // Only allow dragging if in drag mode
   if (isDragModeForRumour(rumour.id)) {
     emit('drag-start', { rumour, event })
+  }
+}
+
+const handleButtonMouseDown = (rumour: any, event: MouseEvent) => {
+  // If in drag mode, detect drag on button mousedown (but let click still toggle)
+  if (isDragModeForRumour(rumour.id) && event.button === 0) {
+    // Small delay to distinguish between click (toggle) and drag
+    const startX = event.clientX
+    const startY = event.clientY
+    const threshold = 3 // pixels
+    
+    const handleMove = (moveEvent: MouseEvent) => {
+      const dx = Math.abs(moveEvent.clientX - startX)
+      const dy = Math.abs(moveEvent.clientY - startY)
+      
+      if (dx > threshold || dy > threshold) {
+        // It's a drag, not a click - pass the move event for accurate coordinates
+        document.removeEventListener('mousemove', handleMove)
+        document.removeEventListener('mouseup', handleUp)
+        // Stop the event to prevent the click from firing
+        event.stopPropagation()
+        handleDragStart(rumour, moveEvent)
+      }
+    }
+    
+    const handleUp = () => {
+      document.removeEventListener('mousemove', handleMove)
+      document.removeEventListener('mouseup', handleUp)
+      // It was a click, let the click handler handle it
+    }
+    
+    document.addEventListener('mousemove', handleMove)
+    document.addEventListener('mouseup', handleUp)
+  }
+}
+
+const handleButtonTouchStart = (rumour: any, event: TouchEvent) => {
+  // For touch in drag mode, start drag
+  if (isDragModeForRumour(rumour.id)) {
+    handleDragStart(rumour, event)
   }
 }
 
