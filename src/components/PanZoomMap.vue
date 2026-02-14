@@ -70,6 +70,11 @@
       >
     </div>
 
+    <!-- Coordinate overlay -->
+    <div class="coordinate-overlay">
+      <span class="coordinate-text">X: {{ mapCoordinates.x }}, Y: {{ mapCoordinates.y }}</span>
+    </div>
+
     <!-- Rumour overlay -->
     <RumourOverlay :map-transform="mapTransform" :rumours="rumours" />
   </div>
@@ -78,6 +83,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import RumourOverlay from "./RumourOverlay.vue";
+
+// Map dimensions constants
+const MAP_WIDTH = 6500;
+const MAP_HEIGHT = 3600;
 
 const props = defineProps({
   rumours: {
@@ -116,6 +125,9 @@ const translateY = ref(0);
 const isPanning = ref(false);
 const startPoint = ref({ x: 0, y: 0 });
 const imageLoaded = ref(false);
+const mouseX = ref(0);
+const mouseY = ref(0);
+const mouseThrottleTimer = ref<number | null>(null);
 
 // Touch handling
 const touchStartDistance = ref(0);
@@ -141,6 +153,23 @@ const mapTransform = computed(() => ({
   isPanning: isPanning.value,
   isTransforming: isTransforming.value,
 }));
+
+// Computed map coordinates based on mouse position
+const mapCoordinates = computed(() => {
+  if (!imageLoaded.value || !container.value) {
+    return { x: 0, y: 0 };
+  }
+  
+  // Convert screen coordinates to map coordinates
+  const mapX = (mouseX.value - translateX.value) / scale.value;
+  const mapY = (mouseY.value - translateY.value) / scale.value;
+  
+  // Clamp to map bounds
+  const clampedX = Math.max(0, Math.min(MAP_WIDTH, Math.round(mapX)));
+  const clampedY = Math.max(0, Math.min(MAP_HEIGHT, Math.round(mapY)));
+  
+  return { x: clampedX, y: clampedY };
+});
 
 /**
  * Mark map as transforming and set up debounce timer
@@ -518,16 +547,36 @@ const handleMapClick = (e) => {
   const mapX = (clickX - translateX.value) / scale.value;
   const mapY = (clickY - translateY.value) / scale.value;
 
-  // Clamp to map bounds (0-6500 x 0-3600)
-  const clampedX = Math.max(0, Math.min(6500, Math.round(mapX)));
-  const clampedY = Math.max(0, Math.min(3600, Math.round(mapY)));
+  // Clamp to map bounds
+  const clampedX = Math.max(0, Math.min(MAP_WIDTH, Math.round(mapX)));
+  const clampedY = Math.max(0, Math.min(MAP_HEIGHT, Math.round(mapY)));
 
   emit('map-click', { x: clampedX, y: clampedY });
+};
+
+/**
+ * Track mouse position for coordinate display
+ * Throttled to avoid excessive updates
+ */
+const handleMouseMove = (e: MouseEvent) => {
+  if (!container.value || mouseThrottleTimer.value) return;
+  
+  const rect = container.value.getBoundingClientRect();
+  mouseX.value = e.clientX - rect.left;
+  mouseY.value = e.clientY - rect.top;
+  
+  // Throttle to ~60fps
+  mouseThrottleTimer.value = window.setTimeout(() => {
+    mouseThrottleTimer.value = null;
+  }, 16);
 };
 
 onMounted(() => {
   window.addEventListener("resize", fitToScreen);
   window.addEventListener("keydown", handleKeyDown);
+  if (container.value) {
+    container.value.addEventListener("mousemove", handleMouseMove);
+  }
 });
 
 onUnmounted(() => {
@@ -535,8 +584,15 @@ onUnmounted(() => {
   window.removeEventListener("keydown", handleKeyDown);
   document.removeEventListener("mousemove", handlePan);
   document.removeEventListener("mouseup", endPan);
+  if (container.value) {
+    container.value.removeEventListener("mousemove", handleMouseMove);
+  }
   if (transformDebounceTimer) {
     clearTimeout(transformDebounceTimer);
+  }
+  if (mouseThrottleTimer.value !== null) {
+    clearTimeout(mouseThrottleTimer.value);
+    mouseThrottleTimer.value = null;
   }
 });
 </script>
@@ -580,6 +636,22 @@ onUnmounted(() => {
   bottom: 1rem;
   left: 1rem;
   z-index: 10;
+}
+
+.coordinate-overlay {
+  position: absolute;
+  bottom: 1rem;
+  right: 10rem;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+}
+
+.coordinate-text {
+  color: #c9d1d9;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .btn-group {
