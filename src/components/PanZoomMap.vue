@@ -65,7 +65,7 @@
 
     <!-- Info overlay -->
     <div class="info-overlay">
-      <span class="Label Label--primary"
+      <span class="coordinate-text"
         >Zoom: {{ Math.round(scale * 100) }}%</span
       >
     </div>
@@ -626,8 +626,9 @@ onUnmounted(() => {
 
 .controls-overlay {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  bottom: 3rem;
+  left: 2rem;
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 10;
 }
 
@@ -635,13 +636,14 @@ onUnmounted(() => {
   position: absolute;
   bottom: 1rem;
   left: 1rem;
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 10;
 }
 
 .coordinate-overlay {
   position: absolute;
   bottom: 1rem;
-  right: 10rem;
+  right: 20rem;
   z-index: 10;
   background-color: rgba(0, 0, 0, 0.5);
   padding: 0.5rem 1rem;
@@ -671,6 +673,7 @@ onUnmounted(() => {
   border: none;
   cursor: pointer;
   transition: all 0.2s;
+  color: #c9d1d9;
 }
 
 .btn:hover {
