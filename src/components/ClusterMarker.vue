@@ -149,7 +149,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue'
 import type { ClusteredRumour, MapTransform } from '../composables/useRumourClustering'
 
 const props = defineProps<{
@@ -197,6 +197,32 @@ const toggleExpand = () => {
     expandedRumourId.value = null
   }
 }
+
+// Handle clicks outside the cluster to collapse it
+const handleClickOutside = (event: MouseEvent) => {
+  if (clusterRef.value && !clusterRef.value.contains(event.target as Node)) {
+    isExpanded.value = false
+    expandedRumourId.value = null
+  }
+}
+
+// Watch isExpanded to add/remove click-outside listener
+watch(isExpanded, (newValue) => {
+  if (newValue) {
+    // Add listener after next tick to avoid immediate collapse from the click that opened it
+    nextTick(() => {
+      document.addEventListener('click', handleClickOutside)
+    })
+  } else {
+    // Remove listener when collapsed
+    document.removeEventListener('click', handleClickOutside)
+  }
+})
+
+// Clean up listener on component unmount
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 
 const handleRumourClick = (rumour: any) => {
   // Toggle accordion: expand/collapse individual rumour
