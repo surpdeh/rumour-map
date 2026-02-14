@@ -29,12 +29,14 @@
       <button
         class="pin-button"
         @click.stop="toggleDragMode"
+        @mousedown="handleButtonMouseDown"
+        @touchstart="handleButtonTouchStart"
         :aria-label="isDragMode ? 'Exit drag mode' : 'Enter drag mode'"
         :title="isDragMode ? 'Click to exit drag mode' : 'Click to enable dragging'"
         :disabled="isEditing"
       >
         <span v-if="isDragMode">⋮⋮</span>
-        <span v-else-if="rumour.is_a_place">⌘</span>
+        <span v-else-if="rumour.is_a_place" class="place-marker">⌘</span>
         <span v-else>📍</span>
       </button>
       <div v-if="rumour.isHovered && !isEditing" class="marker-title">{{ rumour.title }}</div>
@@ -405,6 +407,45 @@ const toggleDragMode = () => {
   isDragMode.value = !isDragMode.value
 }
 
+const handleButtonMouseDown = (e) => {
+  // If in drag mode, start drag on button mousedown (but let click still toggle)
+  if (isDragMode.value && !isEditing.value && e.button === 0) {
+    // Small delay to distinguish between click (toggle) and drag
+    // If mouse moves before mouseup, it's a drag; otherwise it's a click
+    const startX = e.clientX
+    const startY = e.clientY
+    const threshold = 3 // pixels
+    
+    const handleMove = (moveEvent) => {
+      const dx = Math.abs(moveEvent.clientX - startX)
+      const dy = Math.abs(moveEvent.clientY - startY)
+      
+      if (dx > threshold || dy > threshold) {
+        // It's a drag, not a click
+        document.removeEventListener('mousemove', handleMove)
+        document.removeEventListener('mouseup', handleUp)
+        emit('drag-start', { rumour: props.rumour, event: e })
+      }
+    }
+    
+    const handleUp = () => {
+      document.removeEventListener('mousemove', handleMove)
+      document.removeEventListener('mouseup', handleUp)
+      // It was a click, let the click handler handle it
+    }
+    
+    document.addEventListener('mousemove', handleMove)
+    document.addEventListener('mouseup', handleUp)
+  }
+}
+
+const handleButtonTouchStart = (e) => {
+  // For touch in drag mode, start drag
+  if (isDragMode.value && !isEditing.value) {
+    emit('drag-start', { rumour: props.rumour, event: e })
+  }
+}
+
 const handleMouseDown = (e) => {
   // Don't start drag when in edit mode or not in drag mode
   if (isEditing.value || !isDragMode.value) {
@@ -688,8 +729,18 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
+.pin-button span {
+  display: inline-block;
+}
+
+/* Drag handle - white/light color for visibility */
+.pin-button span:first-child {
+  color: #c9d1d9;
+}
+
+/* Place marker - red for visibility */
 .place-marker {
-  color: white;
+  color: #ff6b6b !important;
 }
 
 .rumour-marker.is-hovered .pin-button {

@@ -45,7 +45,7 @@
             :title="isDragModeForRumour(rumour.id) ? 'Click to exit drag mode' : 'Click to enable dragging'"
           >
             <span v-if="isDragModeForRumour(rumour.id)">⋮⋮</span>
-            <span v-else-if="rumour.is_a_place">⌘</span>
+            <span v-else-if="rumour.is_a_place" class="place-marker">⌘</span>
             <span v-else>📍</span>
           </button>
           
@@ -429,6 +429,20 @@ const formatDate = (dateString: string) => {
   line-height: 1;
   transition: transform 0.1s;
   flex-shrink: 0;
+}
+
+.pin-button span {
+  display: inline-block;
+}
+
+/* Drag handle - white/light color for visibility */
+.pin-button span:first-child {
+  color: #c9d1d9;
+}
+
+/* Place marker - red for visibility */
+.cluster-rumour-header .pin-button .place-marker {
+  color: #ff6b6b;
 }
 
 .pin-button:hover {
