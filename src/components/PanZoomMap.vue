@@ -84,6 +84,10 @@
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import RumourOverlay from "./RumourOverlay.vue";
 
+// Map dimensions constants
+const MAP_WIDTH = 6500;
+const MAP_HEIGHT = 3600;
+
 const props = defineProps({
   rumours: {
     type: Array,
@@ -160,8 +164,8 @@ const mapCoordinates = computed(() => {
   const mapY = (mouseY.value - translateY.value) / scale.value;
   
   // Clamp to map bounds
-  const clampedX = Math.max(0, Math.min(6500, Math.round(mapX)));
-  const clampedY = Math.max(0, Math.min(3600, Math.round(mapY)));
+  const clampedX = Math.max(0, Math.min(MAP_WIDTH, Math.round(mapX)));
+  const clampedY = Math.max(0, Math.min(MAP_HEIGHT, Math.round(mapY)));
   
   return { x: clampedX, y: clampedY };
 });
@@ -542,18 +546,27 @@ const handleMapClick = (e) => {
   const mapX = (clickX - translateX.value) / scale.value;
   const mapY = (clickY - translateY.value) / scale.value;
 
-  // Clamp to map bounds (0-6500 x 0-3600)
-  const clampedX = Math.max(0, Math.min(6500, Math.round(mapX)));
-  const clampedY = Math.max(0, Math.min(3600, Math.round(mapY)));
+  // Clamp to map bounds
+  const clampedX = Math.max(0, Math.min(MAP_WIDTH, Math.round(mapX)));
+  const clampedY = Math.max(0, Math.min(MAP_HEIGHT, Math.round(mapY)));
 
   emit('map-click', { x: clampedX, y: clampedY });
 };
 
 /**
  * Track mouse position for coordinate display
+ * Throttled to avoid excessive updates
  */
-const handleMouseMove = (e) => {
+let mouseThrottleTimer: number | null = null;
+const handleMouseMove = (e: MouseEvent) => {
   if (!container.value) return;
+  
+  // Throttle updates to every 16ms (~60fps)
+  if (mouseThrottleTimer) return;
+  
+  mouseThrottleTimer = window.setTimeout(() => {
+    mouseThrottleTimer = null;
+  }, 16);
   
   const rect = container.value.getBoundingClientRect();
   mouseX.value = e.clientX - rect.left;
