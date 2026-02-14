@@ -875,4 +875,110 @@ const formatDate = (dateString: string) => {
   opacity: 1;
   max-height: 1000px; /* Increased to accommodate longer content */
 }
+
+/* Edit form styles */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.edit-field-full {
+  grid-column: 1 / -1;
+}
+
+.edit-field-checkbox {
+  flex-direction: row;
+  align-items: center;
+}
+
+.edit-label {
+  color: #8b949e;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.edit-input {
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  color: #c9d1d9;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: inherit;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: #1f6feb;
+}
+
+.edit-input::placeholder {
+  color: #6e7681;
+}
+
+.edit-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.edit-textarea {
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #30363d;
+}
+
+.save-button,
+.cancel-button {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-button {
+  background-color: #238636;
+  color: white;
+}
+
+.save-button:hover {
+  background-color: #2ea043;
+}
+
+.cancel-button {
+  background-color: #6e7681;
+  color: white;
+}
+
+.cancel-button:hover {
+  background-color: #8b949e;
+}
+
+.edit-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
 </style>
