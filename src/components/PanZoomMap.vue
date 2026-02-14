@@ -75,7 +75,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import RumourOverlay from "./RumourOverlay.vue";
 
@@ -257,7 +257,7 @@ const handleWheel = (e) => {
   }
 };
 
-const handleDoubleClick = (e) => {
+const handleDoubleClick = (e: MouseEvent) => {
   e.preventDefault();
   
   const rect = container.value.getBoundingClientRect();

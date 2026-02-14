@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, VueWrapper } from '@vue/test-utils';
 import PanZoomMap from '../../src/components/PanZoomMap.vue';
 
 describe('PanZoomMap - Double Click Zoom', () => {
-  let wrapper: any;
+  let wrapper: VueWrapper<InstanceType<typeof PanZoomMap>>;
 
   beforeEach(() => {
     wrapper = mount(PanZoomMap, {
