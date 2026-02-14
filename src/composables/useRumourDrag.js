@@ -28,7 +28,9 @@ export function useRumourDrag(mapTransform) {
    * @param {Event} event - The mouse or touch event
    */
   const startDrag = (rumour, event) => {
-    if (rumour.isPinned) return
+    // Note: We no longer check isPinned here because components now control
+    // when to emit drag-start events based on isDragMode state.
+    // If this function is called, it means dragging is intended.
 
     // Prevent default to avoid text selection or page scroll
     event.preventDefault()

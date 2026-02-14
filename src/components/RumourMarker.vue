@@ -3,8 +3,9 @@
     ref="markerRef"
     class="rumour-marker"
     :class="{
-      'is-pinned': rumour.isPinned,
-      'is-unpinned': !rumour.isPinned,
+      'is-pinned': rumour.isPinned && !isDragMode,
+      'is-unpinned': !rumour.isPinned && !isDragMode,
+      'is-drag-mode': isDragMode,
       'is-hovered': rumour.isHovered,
       'is-dragging': rumour.isDragging,
       'is-modified': rumour.isModified,
@@ -27,15 +28,16 @@
     <div class="marker-header">
       <button
         class="pin-button"
-        @click.stop="togglePin"
-        :aria-label="rumour.isPinned ? 'Unpin this rumour to move it' : 'Pin this rumour'"
-        :title="rumour.isPinned ? 'Click to unpin and drag' : 'Click to pin in place'"
+        @click.stop="toggleDragMode"
+        @mousedown="handleButtonMouseDown"
+        @touchstart="handleButtonTouchStart"
+        :aria-label="isDragMode ? 'Exit drag mode' : 'Enter drag mode'"
+        :title="isDragMode ? 'Click to exit drag mode' : 'Click to enable dragging'"
         :disabled="isEditing"
       >
-        <span v-if="rumour.is_a_place && rumour.isPinned" class="place-marker">⌘</span>
-        <span v-else-if="rumour.is_a_place && !rumour.isPinned">🔀</span>
-        <span v-else-if="rumour.isPinned">📍</span>
-        <span v-else>🔀</span>
+        <span v-if="isDragMode" class="drag-handle">⋮⋮</span>
+        <span v-else-if="rumour.is_a_place" class="place-marker">⌘</span>
+        <span v-else>📍</span>
       </button>
       <div v-if="rumour.isHovered && !isEditing" class="marker-title">{{ rumour.title }}</div>
       <input
@@ -63,6 +65,7 @@
       >
         ✏️
       </button>
+
     </div>
 
     <!-- Description (shown on hover or mobile tap) -->
@@ -249,6 +252,7 @@ const { markFieldAsModified } = useRumourUpdates()
 
 const markerRef = ref(null)
 const isEditing = ref(false)
+const isDragMode = ref(false)
 const dialogOffset = ref({ top: 0, left: 0 })
 const VIEWPORT_PADDING = 20 // Padding from viewport edges in pixels
 const editData = ref({
@@ -395,34 +399,80 @@ const handleMouseLeave = () => {
   }, 200)
 }
 
-const togglePin = () => {
-  emit('toggle-pin', props.rumour)
+const toggleDragMode = () => {
+  // If exiting drag mode while dragging, reset dragging state
+  if (isDragMode.value && props.rumour.isDragging) {
+    props.rumour.isDragging = false
+  }
+  isDragMode.value = !isDragMode.value
+}
+
+const handleButtonMouseDown = (e) => {
+  // If in drag mode, start drag on button mousedown (but let click still toggle)
+  if (isDragMode.value && !isEditing.value && e.button === 0) {
+    // Small delay to distinguish between click (toggle) and drag
+    // If mouse moves before mouseup, it's a drag; otherwise it's a click
+    const startX = e.clientX
+    const startY = e.clientY
+    const threshold = 3 // pixels
+    
+    const handleMove = (moveEvent) => {
+      const dx = Math.abs(moveEvent.clientX - startX)
+      const dy = Math.abs(moveEvent.clientY - startY)
+      
+      if (dx > threshold || dy > threshold) {
+        // It's a drag, not a click - pass the move event for accurate coordinates
+        document.removeEventListener('mousemove', handleMove)
+        document.removeEventListener('mouseup', handleUp)
+        emit('drag-start', { rumour: props.rumour, event: moveEvent })
+      }
+    }
+    
+    const handleUp = () => {
+      document.removeEventListener('mousemove', handleMove)
+      document.removeEventListener('mouseup', handleUp)
+      // It was a click, let the click handler handle it
+    }
+    
+    document.addEventListener('mousemove', handleMove)
+    document.addEventListener('mouseup', handleUp)
+  }
+}
+
+const handleButtonTouchStart = (e) => {
+  // For touch in drag mode, start drag
+  if (isDragMode.value && !isEditing.value) {
+    emit('drag-start', { rumour: props.rumour, event: e })
+  }
 }
 
 const handleMouseDown = (e) => {
-  // Don't start drag when in edit mode
-  if (isEditing.value) {
+  // Don't start drag when in edit mode or not in drag mode
+  if (isEditing.value || !isDragMode.value) {
     return
   }
   
-  if (!props.rumour.isPinned && e.button === 0) {
+  // Start drag when in drag mode
+  if (e.button === 0) {
     emit('drag-start', { rumour: props.rumour, event: e })
   }
 }
 
 // Touch handling
 const handleTouchStart = (e) => {
-  // For pinned rumours, implement long-press to unpin (mobile UX)
-  if (props.rumour.isPinned) {
-    longPressTimeout.value = setTimeout(() => {
-      // Toggle expansion on tap (mobile behavior)
-      props.rumour.isHovered = !props.rumour.isHovered
-      longPressTimeout.value = null
-    }, 150)
-  } else {
-    // For unpinned rumours, start drag immediately
+  // If in drag mode, start drag immediately
+  if (isDragMode.value && !isEditing.value) {
     emit('drag-start', { rumour: props.rumour, event: e })
+    return
   }
+  
+  // Otherwise, touch on main marker toggles expansion on tap
+  // Dragging now only happens via drag mode
+  longPressTimeout.value = setTimeout(() => {
+    // Toggle expansion on tap (mobile behavior)
+    props.rumour.isHovered = !props.rumour.isHovered
+    longPressTimeout.value = null
+  }, 150)
 }
 
 const handleTouchEnd = (e) => {
@@ -608,8 +658,17 @@ onBeforeUnmount(() => {
 }
 
 .rumour-marker.is-unpinned {
-  cursor: grab;
+  cursor: pointer;
   border-color: #f78166;
+}
+
+.rumour-marker.is-drag-mode {
+  cursor: grab;
+  border-color: #d29922;
+}
+
+.rumour-marker.is-drag-mode.is-dragging {
+  cursor: grabbing;
 }
 
 .rumour-marker.is-modified {
@@ -670,8 +729,18 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
-.place-marker {
-  color: white;
+.pin-button span {
+  display: inline-block;
+}
+
+/* Drag handle - white/light color for visibility */
+.pin-button .drag-handle {
+  color: #c9d1d9;
+}
+
+/* Place marker - red for visibility */
+.pin-button .place-marker {
+  color: #ff6b6b;
 }
 
 .rumour-marker.is-hovered .pin-button {
@@ -786,7 +855,6 @@ onBeforeUnmount(() => {
   line-height: 1;
   transition: transform 0.1s;
   flex-shrink: 0;
-  margin-left: auto;
 }
 
 .edit-button:hover {
@@ -795,6 +863,26 @@ onBeforeUnmount(() => {
 
 .edit-button:active {
   transform: scale(0.9);
+}
+
+/* Drag handle */
+.drag-handle {
+  color: #8b949e;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: grab;
+  flex-shrink: 0;
+  padding: 0 0.25rem;
+  user-select: none;
+  margin-left: 0.25rem;
+}
+
+.drag-handle:hover {
+  color: #c9d1d9;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
 }
 
 .pin-button:disabled {
