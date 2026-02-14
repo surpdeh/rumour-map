@@ -104,43 +104,154 @@
         <!-- Accordion content: rumour details -->
         <transition name="accordion">
           <div v-if="expandedRumourId === rumour.id" class="cluster-rumour-details">
-            <!-- Metadata Section -->
-            <div v-if="hasMetadata(rumour)" class="metadata-section">
-              <div v-if="rumour.session_date" class="metadata-item">
-                <span class="metadata-label">Session:</span>
-                <span class="metadata-value">{{ formatDate(rumour.session_date) }}</span>
+            <!-- Edit Mode -->
+            <div v-if="editingRumourId === rumour.id" class="edit-form">
+              <div class="edit-field">
+                <label class="edit-label">Title:</label>
+                <input
+                  v-model="editData.title"
+                  class="edit-input edit-title"
+                  type="text"
+                  placeholder="Title"
+                  @click.stop
+                />
               </div>
-              <div v-if="rumour.game_date" class="metadata-item">
-                <span class="metadata-label">Game Date:</span>
-                <span class="metadata-value">{{ rumour.game_date }}</span>
+              <div class="edit-field">
+                <label class="edit-label">Session Date:</label>
+                <input
+                  v-model="editData.session_date"
+                  class="edit-input"
+                  type="text"
+                  placeholder="Session date"
+                  @click.stop
+                />
               </div>
-              <div v-if="rumour.location_heard" class="metadata-item">
-                <span class="metadata-label">Heard at:</span>
-                <span class="metadata-value">{{ rumour.location_heard }}</span>
+              <div class="edit-field edit-field-full">
+                <label class="edit-label">Game Date (Harptos Calendar):</label>
+                <HarptosDateInput
+                  v-model="editData.game_date"
+                  placeholder="e.g., 15 Hammer, 1492 DR"
+                  @click.stop
+                />
               </div>
-              <div v-if="rumour.location_targetted" class="metadata-item">
-                <span class="metadata-label">About:</span>
-                <span class="metadata-value">{{ rumour.location_targetted }}</span>
+              <div class="edit-field">
+                <label class="edit-label">Heard at:</label>
+                <input
+                  v-model="editData.location_heard"
+                  class="edit-input"
+                  type="text"
+                  placeholder="Location heard"
+                  @click.stop
+                />
               </div>
-              <div v-if="rumour.rating !== null && rumour.rating !== undefined" class="metadata-item">
-                <span class="metadata-label">Rating:</span>
-                <span class="metadata-value">⭐ {{ rumour.rating }}/10</span>
+              <div class="edit-field">
+                <label class="edit-label">About:</label>
+                <input
+                  v-model="editData.location_targetted"
+                  class="edit-input"
+                  type="text"
+                  placeholder="Location targetted"
+                  @click.stop
+                />
               </div>
-              <div class="metadata-item">
-                <span class="metadata-label">Status:</span>
-                <span :class="['metadata-value', rumour.resolved ? 'status-resolved' : 'status-unresolved']">
-                  {{ rumour.resolved ? '✓ Resolved' : '○ Unresolved' }}
-                </span>
+              <div class="edit-field">
+                <label class="edit-label">Rating:</label>
+                <input
+                  v-model.number="editData.rating"
+                  class="edit-input"
+                  type="number"
+                  min="0"
+                  max="10"
+                  placeholder="Rating (0-10)"
+                  @click.stop
+                />
+              </div>
+              <div class="edit-field edit-checkbox">
+                <label class="edit-label">
+                  <input
+                    v-model="editData.is_a_place"
+                    type="checkbox"
+                    @click.stop
+                  />
+                  Place
+                </label>
+              </div>
+              <div class="edit-field edit-checkbox">
+                <label class="edit-label">
+                  <input
+                    v-model="editData.resolved"
+                    type="checkbox"
+                    @click.stop
+                  />
+                  Resolved
+                </label>
+              </div>
+              <div class="edit-field edit-field-full">
+                <label class="edit-label">Details:</label>
+                <textarea
+                  v-model="editData.details"
+                  class="edit-input edit-textarea"
+                  placeholder="Details"
+                  rows="3"
+                  @click.stop
+                ></textarea>
+              </div>
+              <div class="edit-actions">
+                <button
+                  class="edit-action-button save-button"
+                  @click.stop="saveEdits(rumour)"
+                >
+                  Save
+                </button>
+                <button
+                  class="edit-action-button cancel-button"
+                  @click.stop="cancelEditing"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
+            
+            <!-- Read-only Mode -->
+            <template v-else>
+              <!-- Metadata Section -->
+              <div v-if="hasMetadata(rumour)" class="metadata-section">
+                <div v-if="rumour.session_date" class="metadata-item">
+                  <span class="metadata-label">Session:</span>
+                  <span class="metadata-value">{{ formatDate(rumour.session_date) }}</span>
+                </div>
+                <div v-if="rumour.game_date" class="metadata-item">
+                  <span class="metadata-label">Game Date:</span>
+                  <span class="metadata-value">{{ rumour.game_date }}</span>
+                </div>
+                <div v-if="rumour.location_heard" class="metadata-item">
+                  <span class="metadata-label">Heard at:</span>
+                  <span class="metadata-value">{{ rumour.location_heard }}</span>
+                </div>
+                <div v-if="rumour.location_targetted" class="metadata-item">
+                  <span class="metadata-label">About:</span>
+                  <span class="metadata-value">{{ rumour.location_targetted }}</span>
+                </div>
+                <div v-if="rumour.rating !== null && rumour.rating !== undefined" class="metadata-item">
+                  <span class="metadata-label">Rating:</span>
+                  <span class="metadata-value">⭐ {{ rumour.rating }}/10</span>
+                </div>
+                <div class="metadata-item">
+                  <span class="metadata-label">Status:</span>
+                  <span :class="['metadata-value', rumour.resolved ? 'status-resolved' : 'status-unresolved']">
+                    {{ rumour.resolved ? '✓ Resolved' : '○ Unresolved' }}
+                  </span>
+                </div>
+              </div>
 
-            <!-- Details Section -->
-            <div v-if="rumour.details" class="details-section">
-              {{ rumour.details }}
-            </div>
-            <div v-else class="details-section empty">
-              <em>No details provided</em>
-            </div>
+              <!-- Details Section -->
+              <div v-if="rumour.details" class="details-section">
+                {{ rumour.details }}
+              </div>
+              <div v-else class="details-section empty">
+                <em>No details provided</em>
+              </div>
+            </template>
           </div>
         </transition>
       </div>
@@ -151,6 +262,8 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue'
 import type { ClusteredRumour, MapTransform } from '../composables/useRumourClustering'
+import { useRumourUpdates } from '@/composables/useRumourUpdates'
+import HarptosDateInput from './HarptosDateInput.vue'
 
 const props = defineProps<{
   cluster: ClusteredRumour
@@ -168,6 +281,20 @@ const isExpanded = ref(false)
 const isHovered = ref(false)
 const expandedRumourId = ref<string | null>(null)
 const dragModeRumours = ref<Set<string>>(new Set())
+const editingRumourId = ref<string | null>(null)
+const editData = ref({
+  title: '',
+  session_date: '',
+  game_date: '',
+  location_heard: '',
+  location_targetted: '',
+  is_a_place: false,
+  rating: null as number | null,
+  resolved: false,
+  details: ''
+})
+
+const { markFieldAsModified } = useRumourUpdates()
 
 // Interactive control selectors for event delegation
 const INTERACTIVE_CONTROLS = '.pin-button, .edit-button, .expand-indicator, .rumour-title'
@@ -323,11 +450,61 @@ const handleHeaderTouchStart = (rumour: any, event: TouchEvent) => {
 }
 
 const handleEdit = (rumour: any) => {
-  // Set the rumour as hovered to trigger edit mode in RumourMarker
-  // This is a temporary solution - ideally we'd handle editing directly in cluster
-  rumour.isHovered = true
-  // Note: Full edit functionality would require expanding this component
-  // For now, this allows the rumour to be edited via its own marker
+  editingRumourId.value = rumour.id
+  // Copy current values to edit data
+  editData.value = {
+    title: rumour.title,
+    session_date: rumour.session_date || '',
+    game_date: rumour.game_date || '',
+    location_heard: rumour.location_heard || '',
+    location_targetted: rumour.location_targetted || '',
+    is_a_place: rumour.is_a_place,
+    rating: rumour.rating,
+    resolved: rumour.resolved,
+    details: rumour.details || ''
+  }
+}
+
+const saveEdits = (rumour: any) => {
+  // Check what fields have changed and mark them as modified
+  const editableFields = ['title', 'session_date', 'game_date', 'location_heard', 'location_targetted', 'is_a_place', 'rating', 'resolved', 'details']
+  
+  editableFields.forEach(fieldName => {
+    const newValue = editData.value[fieldName as keyof typeof editData.value]
+    const oldValue = rumour.originalValues?.[fieldName]
+    
+    // Handle null/empty string equivalence and type coercion
+    const normalizedNew = (newValue === '' || newValue === null || newValue === undefined) ? null : newValue
+    const normalizedOld = (oldValue === '' || oldValue === null || oldValue === undefined) ? null : oldValue
+    
+    // Use loose equality (!=) intentionally for type coercion between null/undefined
+    // This handles cases where Google Sheets may return undefined vs null vs empty string
+    // eslint-disable-next-line eqeqeq
+    if (normalizedNew != normalizedOld) {
+      // Update the rumour object (note: direct mutation is acceptable here as rumour is a reactive object)
+      rumour[fieldName] = normalizedNew
+      
+      // Mark field as modified
+      markFieldAsModified(rumour, fieldName)
+    }
+  })
+  
+  editingRumourId.value = null
+}
+
+const cancelEditing = () => {
+  editingRumourId.value = null
+  editData.value = {
+    title: '',
+    session_date: '',
+    game_date: '',
+    location_heard: '',
+    location_targetted: '',
+    is_a_place: false,
+    rating: null,
+    resolved: false,
+    details: ''
+  }
 }
 
 // Get a text description of modified fields
