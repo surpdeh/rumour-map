@@ -88,7 +88,7 @@
             @keydown.enter.prevent="handleRumourClick(rumour)"
             @keydown.space.prevent="handleRumourClick(rumour)"
             :tabindex="0"
-            :aria-label="'Toggle rumour details'"
+            aria-label="Toggle rumour details"
             role="button"
           >
             {{ expandedRumourId === rumour.id ? '▼' : '▶' }}
@@ -99,7 +99,7 @@
             class="drag-handle"
             @mousedown.stop="handleDragStart(rumour, $event)"
             @touchstart.stop="handleDragStart(rumour, $event)"
-            :aria-label="'Drag to move rumour'"
+            aria-label="Drag to move rumour"
             title="Drag to move"
           >
             ⋮⋮

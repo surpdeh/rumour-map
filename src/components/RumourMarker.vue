@@ -68,7 +68,7 @@
         class="drag-handle"
         @mousedown.stop="handleDragMouseDown"
         @touchstart.stop="handleDragTouchStart"
-        :aria-label="'Drag to move rumour'"
+        aria-label="Drag to move rumour"
         title="Drag to move"
       >
         ⋮⋮
@@ -434,14 +434,13 @@ const handleDragTouchStart = (e) => {
 
 // Touch handling
 const handleTouchStart = (e) => {
-  // For touch on main marker, just toggle expansion on tap
-  if (props.rumour.isPinned || !props.rumour.isPinned) {
-    longPressTimeout.value = setTimeout(() => {
-      // Toggle expansion on tap (mobile behavior)
-      props.rumour.isHovered = !props.rumour.isHovered
-      longPressTimeout.value = null
-    }, 150)
-  }
+  // Touch on main marker toggles expansion on tap
+  // Dragging now only happens via drag handle
+  longPressTimeout.value = setTimeout(() => {
+    // Toggle expansion on tap (mobile behavior)
+    props.rumour.isHovered = !props.rumour.isHovered
+    longPressTimeout.value = null
+  }, 150)
 }
 
 const handleTouchEnd = (e) => {
@@ -833,14 +832,6 @@ onBeforeUnmount(() => {
 
 .drag-handle:active {
   cursor: grabbing;
-}
-
-.edit-button:hover {
-  transform: scale(1.2);
-}
-
-.edit-button:active {
-  transform: scale(0.9);
 }
 
 .pin-button:disabled {
