@@ -127,6 +127,7 @@ const startPoint = ref({ x: 0, y: 0 });
 const imageLoaded = ref(false);
 const mouseX = ref(0);
 const mouseY = ref(0);
+const mouseThrottleTimer = ref<number | null>(null);
 
 // Touch handling
 const touchStartDistance = ref(0);
@@ -557,17 +558,16 @@ const handleMapClick = (e) => {
  * Track mouse position for coordinate display
  * Throttled to avoid excessive updates
  */
-let mouseThrottleTimer: number | null = null;
 const handleMouseMove = (e: MouseEvent) => {
-  if (!container.value || mouseThrottleTimer) return;
+  if (!container.value || mouseThrottleTimer.value) return;
   
   const rect = container.value.getBoundingClientRect();
   mouseX.value = e.clientX - rect.left;
   mouseY.value = e.clientY - rect.top;
   
   // Throttle to ~60fps
-  mouseThrottleTimer = window.setTimeout(() => {
-    mouseThrottleTimer = null;
+  mouseThrottleTimer.value = window.setTimeout(() => {
+    mouseThrottleTimer.value = null;
   }, 16);
 };
 
@@ -590,8 +590,9 @@ onUnmounted(() => {
   if (transformDebounceTimer) {
     clearTimeout(transformDebounceTimer);
   }
-  if (mouseThrottleTimer) {
-    clearTimeout(mouseThrottleTimer);
+  if (mouseThrottleTimer.value !== null) {
+    clearTimeout(mouseThrottleTimer.value);
+    mouseThrottleTimer.value = null;
   }
 });
 </script>
