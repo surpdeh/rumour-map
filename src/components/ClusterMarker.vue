@@ -168,6 +168,9 @@ const isHovered = ref(false)
 const expandedRumourId = ref<string | null>(null)
 const dragModeRumours = ref<Set<string>>(new Set())
 
+// Interactive control selectors for event delegation
+const INTERACTIVE_CONTROLS = '.pin-button, .edit-button, .expand-indicator, .rumour-title'
+
 const clusterStyle = computed(() => {
   return {
     left: `${props.cluster.screenX}px`,
@@ -205,6 +208,10 @@ const handleRumourClick = (rumour: any) => {
 
 const handleToggleDragMode = (rumour: any) => {
   if (dragModeRumours.value.has(rumour.id)) {
+    // Exiting drag mode - reset dragging state if currently dragging
+    if (rumour.isDragging) {
+      rumour.isDragging = false
+    }
     dragModeRumours.value.delete(rumour.id)
   } else {
     dragModeRumours.value.add(rumour.id)
@@ -215,10 +222,6 @@ const handleToggleDragMode = (rumour: any) => {
 
 const isDragModeForRumour = (rumourId: string) => {
   return dragModeRumours.value.has(rumourId)
-}
-
-const handleTogglePin = (rumour: any) => {
-  emit('toggle-pin', rumour)
 }
 
 const handleDragStart = (rumour: any, event: MouseEvent | TouchEvent) => {
@@ -233,7 +236,7 @@ const handleHeaderMouseDown = (rumour: any, event: MouseEvent) => {
   if (isDragModeForRumour(rumour.id) && event.button === 0) {
     // Check if click was on an interactive element
     const target = event.target as HTMLElement
-    if (target.closest('.pin-button, .edit-button, .expand-indicator, .rumour-title')) {
+    if (target.closest(INTERACTIVE_CONTROLS)) {
       return // Let the control handle it
     }
     handleDragStart(rumour, event)
@@ -245,7 +248,7 @@ const handleHeaderTouchStart = (rumour: any, event: TouchEvent) => {
   if (isDragModeForRumour(rumour.id)) {
     // Check if touch was on an interactive element
     const target = event.target as HTMLElement
-    if (target.closest('.pin-button, .edit-button, .expand-indicator, .rumour-title')) {
+    if (target.closest(INTERACTIVE_CONTROLS)) {
       return // Let the control handle it
     }
     handleDragStart(rumour, event)

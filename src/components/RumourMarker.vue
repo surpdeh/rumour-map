@@ -398,6 +398,10 @@ const handleMouseLeave = () => {
 }
 
 const toggleDragMode = () => {
+  // If exiting drag mode while dragging, reset dragging state
+  if (isDragMode.value && props.rumour.isDragging) {
+    props.rumour.isDragging = false
+  }
   isDragMode.value = !isDragMode.value
 }
 
