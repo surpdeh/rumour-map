@@ -30,19 +30,23 @@
         :class="{ 'is-expanded': expandedRumourId === rumour.id }"
       >
         <!-- Accordion header: icon + title + controls -->
-        <div class="cluster-rumour-header">
-          <!-- Pin/Unpin button -->
+        <div 
+          class="cluster-rumour-header"
+          :class="{ 'is-drag-mode': isDragModeForRumour(rumour.id) }"
+          @mousedown="handleHeaderMouseDown(rumour, $event)"
+          @touchstart="handleHeaderTouchStart(rumour, $event)"
+        >
+          <!-- Pin/Drag toggle button -->
           <button
             class="pin-button"
-            @click.stop="handleTogglePin(rumour)"
+            @click.stop="handleToggleDragMode(rumour)"
             @mousedown.stop
-            :aria-label="rumour.isPinned ? 'Unpin this rumour' : 'Pin this rumour'"
-            :title="rumour.isPinned ? 'Click to unpin' : 'Click to pin in place'"
+            :aria-label="isDragModeForRumour(rumour.id) ? 'Exit drag mode' : 'Enter drag mode'"
+            :title="isDragModeForRumour(rumour.id) ? 'Click to exit drag mode' : 'Click to enable dragging'"
           >
-            <span v-if="rumour.is_a_place && rumour.isPinned">⌘</span>
-            <span v-else-if="rumour.is_a_place && !rumour.isPinned">🔀</span>
-            <span v-else-if="rumour.isPinned">📍</span>
-            <span v-else>🔀</span>
+            <span v-if="isDragModeForRumour(rumour.id)">⋮⋮</span>
+            <span v-else-if="rumour.is_a_place">⌘</span>
+            <span v-else>📍</span>
           </button>
           
           <!-- Title (clickable to expand) -->
@@ -93,17 +97,7 @@
           >
             {{ expandedRumourId === rumour.id ? '▼' : '▶' }}
           </span>
-          
-          <!-- Drag handle (always shown) -->
-          <span
-            class="drag-handle"
-            @mousedown.stop="handleDragStart(rumour, $event)"
-            @touchstart.stop="handleDragStart(rumour, $event)"
-            aria-label="Drag to move rumour"
-            title="Drag to move"
-          >
-            ⋮⋮
-          </span>
+
         </div>
 
         <!-- Accordion content: rumour details -->
@@ -172,6 +166,7 @@ const clusterRef = ref<HTMLElement | null>(null)
 const isExpanded = ref(false)
 const isHovered = ref(false)
 const expandedRumourId = ref<string | null>(null)
+const dragModeRumours = ref<Set<string>>(new Set())
 
 const clusterStyle = computed(() => {
   return {
@@ -208,13 +203,53 @@ const handleRumourClick = (rumour: any) => {
   }
 }
 
+const handleToggleDragMode = (rumour: any) => {
+  if (dragModeRumours.value.has(rumour.id)) {
+    dragModeRumours.value.delete(rumour.id)
+  } else {
+    dragModeRumours.value.add(rumour.id)
+  }
+  // Force reactivity
+  dragModeRumours.value = new Set(dragModeRumours.value)
+}
+
+const isDragModeForRumour = (rumourId: string) => {
+  return dragModeRumours.value.has(rumourId)
+}
+
 const handleTogglePin = (rumour: any) => {
   emit('toggle-pin', rumour)
 }
 
 const handleDragStart = (rumour: any, event: MouseEvent | TouchEvent) => {
-  // Allow dragging regardless of pinned state
-  emit('drag-start', { rumour, event })
+  // Only allow dragging if in drag mode
+  if (isDragModeForRumour(rumour.id)) {
+    emit('drag-start', { rumour, event })
+  }
+}
+
+const handleHeaderMouseDown = (rumour: any, event: MouseEvent) => {
+  // If in drag mode, start drag on header mousedown
+  if (isDragModeForRumour(rumour.id) && event.button === 0) {
+    // Check if click was on an interactive element
+    const target = event.target as HTMLElement
+    if (target.closest('.pin-button, .edit-button, .expand-indicator, .rumour-title')) {
+      return // Let the control handle it
+    }
+    handleDragStart(rumour, event)
+  }
+}
+
+const handleHeaderTouchStart = (rumour: any, event: TouchEvent) => {
+  // If in drag mode, start drag on header touch
+  if (isDragModeForRumour(rumour.id)) {
+    // Check if touch was on an interactive element
+    const target = event.target as HTMLElement
+    if (target.closest('.pin-button, .edit-button, .expand-indicator, .rumour-title')) {
+      return // Let the control handle it
+    }
+    handleDragStart(rumour, event)
+  }
 }
 
 const handleEdit = (rumour: any) => {
@@ -371,6 +406,15 @@ const formatDate = (dateString: string) => {
 
 .cluster-rumour-header:hover {
   background-color: rgba(88, 166, 255, 0.05);
+}
+
+.cluster-rumour-header.is-drag-mode {
+  cursor: grab;
+  background-color: rgba(210, 153, 34, 0.1);
+}
+
+.cluster-rumour-header.is-drag-mode:active {
+  cursor: grabbing;
 }
 
 .pin-button {

@@ -3,8 +3,9 @@
     ref="markerRef"
     class="rumour-marker"
     :class="{
-      'is-pinned': rumour.isPinned,
-      'is-unpinned': !rumour.isPinned,
+      'is-pinned': rumour.isPinned && !isDragMode,
+      'is-unpinned': !rumour.isPinned && !isDragMode,
+      'is-drag-mode': isDragMode,
       'is-hovered': rumour.isHovered,
       'is-dragging': rumour.isDragging,
       'is-modified': rumour.isModified,
@@ -27,15 +28,14 @@
     <div class="marker-header">
       <button
         class="pin-button"
-        @click.stop="togglePin"
-        :aria-label="rumour.isPinned ? 'Unpin this rumour' : 'Pin this rumour'"
-        :title="rumour.isPinned ? 'Click to unpin' : 'Click to pin in place'"
+        @click.stop="toggleDragMode"
+        :aria-label="isDragMode ? 'Exit drag mode' : 'Enter drag mode'"
+        :title="isDragMode ? 'Click to exit drag mode' : 'Click to enable dragging'"
         :disabled="isEditing"
       >
-        <span v-if="rumour.is_a_place && rumour.isPinned" class="place-marker">⌘</span>
-        <span v-else-if="rumour.is_a_place && !rumour.isPinned">🔀</span>
-        <span v-else-if="rumour.isPinned">📍</span>
-        <span v-else>🔀</span>
+        <span v-if="isDragMode">⋮⋮</span>
+        <span v-else-if="rumour.is_a_place">⌘</span>
+        <span v-else>📍</span>
       </button>
       <div v-if="rumour.isHovered && !isEditing" class="marker-title">{{ rumour.title }}</div>
       <input
@@ -63,16 +63,7 @@
       >
         ✏️
       </button>
-      <span
-        v-if="rumour.isHovered && !isEditing"
-        class="drag-handle"
-        @mousedown.stop="handleDragMouseDown"
-        @touchstart.stop="handleDragTouchStart"
-        aria-label="Drag to move rumour"
-        title="Drag to move"
-      >
-        ⋮⋮
-      </span>
+
     </div>
 
     <!-- Description (shown on hover or mobile tap) -->
@@ -259,6 +250,7 @@ const { markFieldAsModified } = useRumourUpdates()
 
 const markerRef = ref(null)
 const isEditing = ref(false)
+const isDragMode = ref(false)
 const dialogOffset = ref({ top: 0, left: 0 })
 const VIEWPORT_PADDING = 20 // Padding from viewport edges in pixels
 const editData = ref({
@@ -405,37 +397,32 @@ const handleMouseLeave = () => {
   }, 200)
 }
 
-const togglePin = () => {
-  emit('toggle-pin', props.rumour)
+const toggleDragMode = () => {
+  isDragMode.value = !isDragMode.value
 }
 
 const handleMouseDown = (e) => {
-  // Don't start drag when in edit mode
-  if (isEditing.value) {
+  // Don't start drag when in edit mode or not in drag mode
+  if (isEditing.value || !isDragMode.value) {
     return
   }
   
-  // Removed auto-drag on mousedown - now only via drag handle
-}
-
-const handleDragMouseDown = (e) => {
-  // Drag from handle - works regardless of pinned state
-  if (!isEditing.value) {
-    emit('drag-start', { rumour: props.rumour, event: e })
-  }
-}
-
-const handleDragTouchStart = (e) => {
-  // Drag from handle - works regardless of pinned state
-  if (!isEditing.value) {
+  // Start drag when in drag mode
+  if (e.button === 0) {
     emit('drag-start', { rumour: props.rumour, event: e })
   }
 }
 
 // Touch handling
 const handleTouchStart = (e) => {
-  // Touch on main marker toggles expansion on tap
-  // Dragging now only happens via drag handle
+  // If in drag mode, start drag immediately
+  if (isDragMode.value && !isEditing.value) {
+    emit('drag-start', { rumour: props.rumour, event: e })
+    return
+  }
+  
+  // Otherwise, touch on main marker toggles expansion on tap
+  // Dragging now only happens via drag mode
   longPressTimeout.value = setTimeout(() => {
     // Toggle expansion on tap (mobile behavior)
     props.rumour.isHovered = !props.rumour.isHovered
@@ -626,8 +613,17 @@ onBeforeUnmount(() => {
 }
 
 .rumour-marker.is-unpinned {
-  cursor: grab;
+  cursor: pointer;
   border-color: #f78166;
+}
+
+.rumour-marker.is-drag-mode {
+  cursor: grab;
+  border-color: #d29922;
+}
+
+.rumour-marker.is-drag-mode.is-dragging {
+  cursor: grabbing;
 }
 
 .rumour-marker.is-modified {
