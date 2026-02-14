@@ -559,18 +559,16 @@ const handleMapClick = (e) => {
  */
 let mouseThrottleTimer: number | null = null;
 const handleMouseMove = (e: MouseEvent) => {
-  if (!container.value) return;
-  
-  // Throttle updates to every 16ms (~60fps)
-  if (mouseThrottleTimer) return;
-  
-  mouseThrottleTimer = window.setTimeout(() => {
-    mouseThrottleTimer = null;
-  }, 16);
+  if (!container.value || mouseThrottleTimer) return;
   
   const rect = container.value.getBoundingClientRect();
   mouseX.value = e.clientX - rect.left;
   mouseY.value = e.clientY - rect.top;
+  
+  // Throttle to ~60fps
+  mouseThrottleTimer = window.setTimeout(() => {
+    mouseThrottleTimer = null;
+  }, 16);
 };
 
 onMounted(() => {
@@ -591,6 +589,9 @@ onUnmounted(() => {
   }
   if (transformDebounceTimer) {
     clearTimeout(transformDebounceTimer);
+  }
+  if (mouseThrottleTimer) {
+    clearTimeout(mouseThrottleTimer);
   }
 });
 </script>
