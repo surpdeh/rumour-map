@@ -5,6 +5,7 @@
       ref="content"
       :style="contentStyle"
       @mousedown="startPan"
+      @dblclick="handleDoubleClick"
       @wheel="handleWheel"
       @touchstart="handleTouchStart"
       @touchmove="handleTouchMove"
@@ -254,6 +255,17 @@ const handleWheel = (e) => {
     const delta = e.deltaY > 0 ? -props.zoomSpeed : props.zoomSpeed;
     zoom(delta, mouseX, mouseY);
   }
+};
+
+const handleDoubleClick = (e) => {
+  e.preventDefault();
+  
+  const rect = container.value.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
+  
+  // Zoom in by 40% (factor 1.4) at the double-click location
+  zoomMultiplicative(1.4, mouseX, mouseY);
 };
 
 const zoomMultiplicative = (factor, originX, originY) => {
