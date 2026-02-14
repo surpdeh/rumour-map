@@ -641,7 +641,7 @@ onUnmounted(() => {
 .coordinate-overlay {
   position: absolute;
   bottom: 1rem;
-  right: 1rem;
+  right: 10rem;
   z-index: 10;
   background-color: rgba(0, 0, 0, 0.5);
   padding: 0.5rem 1rem;
