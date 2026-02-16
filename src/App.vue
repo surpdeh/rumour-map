@@ -424,19 +424,18 @@ const handleCancelAdd = () => {
   color: #c9d1d9;
 }
 
-.header-link {
+.header-link,
+.header-text {
   color: #8b949e;
   font-size: 0.875rem;
+}
+
+.header-link {
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .header-link:hover {
   color: #c9d1d9;
-}
-
-.header-text {
-  color: #8b949e;
-  font-size: 0.875rem;
 }
 </style>
