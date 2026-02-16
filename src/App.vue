@@ -64,8 +64,8 @@ const handleCancelAdd = () => {
       </div>
       <div class="Header-item">
         <div>
-        <a href="privacy.html">Privacy Policy</a><br/>
-        <a href="tos.html">Terms of Service</a>
+        <a href="privacy.html" class="header-link">Privacy Policy</a><br/>
+        <a href="tos.html" class="header-link">Terms of Service</a>
         </div>
       </div>
       <div class="Header-item Header-item--full"></div>
@@ -158,7 +158,7 @@ const handleCancelAdd = () => {
       </div>
 
       <div class="Header-item">
-        <span class="Label">High Resolution Map Viewer</span>
+        <span class="header-text">High Resolution Map Viewer</span>
       </div>
     </header>
 
@@ -422,5 +422,21 @@ const handleCancelAdd = () => {
 
 .search-clear:hover {
   color: #c9d1d9;
+}
+
+.header-link {
+  color: #8b949e;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.header-link:hover {
+  color: #c9d1d9;
+}
+
+.header-text {
+  color: #8b949e;
+  font-size: 0.875rem;
 }
 </style>
